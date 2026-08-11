@@ -10,3 +10,4 @@
 
 # env files
 .env*
+.vercel
