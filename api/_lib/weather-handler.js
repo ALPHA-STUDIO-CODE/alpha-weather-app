@@ -1,4 +1,10 @@
+import { config } from "dotenv";
+config({ path: ".env.local" });
+
 import { buildUpstreamRequest } from "./weather-request.js";
+import { setDefaultAutoSelectFamilyAttemptTimeout } from "node:net";
+
+setDefaultAutoSelectFamilyAttemptTimeout(300);
 
 export async function handleWeatherRequest(
   query,
@@ -25,14 +31,20 @@ export async function handleWeatherRequest(
       return { status: 404, body: { error: "city not found" } };
     }
     if (!response.ok) {
+      console.error(
+        "OpenWeather returned non-OK status:",
+        response.status,
+        data,
+      );
       return {
         status: 502,
         body: { error: "upstream weather service failed" },
       };
     }
     return { status: 200, body: data };
-  } catch {
-    console.error(err);
+  } catch (err) {
+    console.log(JSON.stringify(apiKey), "length:", apiKey?.length);
+    console.error("Fetch to OpenWeather threw:", err);
     return { status: 502, body: { error: "upstream weather service failed" } };
   }
 }
