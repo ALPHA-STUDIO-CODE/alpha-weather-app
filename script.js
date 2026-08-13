@@ -1,9 +1,14 @@
 // Alpha Weather Report — script.js
 
-import { fetchCurrentWeather, fetchForecast } from "./src/apiClient.js";
+import {
+  fetchCurrentWeather,
+  fetchForecast,
+  WeatherApiError,
+} from "./src/apiClient.js";
 import { formatTemp } from "./src/lib/units.js";
 import { formatLocalTime } from "./src/lib/time.js";
 import { groupByDay, dailySummary } from "./src/lib/forecast.js";
+import { getErrorMessage } from "./src/lib/errors.js";
 
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-input");
@@ -21,6 +26,7 @@ const forecastSection = document.getElementById("forecast");
 const forecastCards = document.getElementById("forecast-cards");
 
 const spinner = document.getElementById("spinner");
+const inlineError = document.getElementById("inline-error");
 
 // Date formatting (e.g. "Tue, Aug 4") lives here rather than in
 // lib/time.js, since lib/time.js only owns the time-of-day portion —
@@ -129,10 +135,17 @@ searchForm.addEventListener("submit", (event) => {
   spinner.hidden = false;
 
   handleSearch(city)
+    .then(() => {
+      // A successful search clears any error left over from a previous
+      // failed one.
+      inlineError.hidden = true;
+    })
     .catch((err) => {
-      // Inline error handling lands in Step 16 — for now, don't let a
-      // failed search produce an uncaught rejection in the console.
-      console.error("Search failed:", err);
+      // Show the mapped message inline; the existing weather display is
+      // deliberately left untouched (§5.4) — nothing here clears it.
+      const type = err instanceof WeatherApiError ? err.type : "generic";
+      inlineError.textContent = getErrorMessage(type);
+      inlineError.hidden = false;
     })
     .finally(() => {
       // .finally() runs on both the success and failure paths, so the
