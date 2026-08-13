@@ -20,6 +20,8 @@ const weatherWind = document.getElementById("weather-wind");
 const forecastSection = document.getElementById("forecast");
 const forecastCards = document.getElementById("forecast-cards");
 
+const spinner = document.getElementById("spinner");
+
 // Date formatting (e.g. "Tue, Aug 4") lives here rather than in
 // lib/time.js, since lib/time.js only owns the time-of-day portion —
 // this uses the same "shift by UTC offset, read back in UTC" trick so
@@ -124,9 +126,17 @@ searchForm.addEventListener("submit", (event) => {
   // Empty submit does nothing — no request fired, no error shown (§5.1).
   if (!city) return;
 
-  handleSearch(city).catch((err) => {
-    // Inline error handling lands in Step 16 — for now, don't let a
-    // failed search produce an uncaught rejection in the console.
-    console.error("Search failed:", err);
-  });
+  spinner.hidden = false;
+
+  handleSearch(city)
+    .catch((err) => {
+      // Inline error handling lands in Step 16 — for now, don't let a
+      // failed search produce an uncaught rejection in the console.
+      console.error("Search failed:", err);
+    })
+    .finally(() => {
+      // .finally() runs on both the success and failure paths, so the
+      // spinner always clears once both requests have settled.
+      spinner.hidden = true;
+    });
 });
