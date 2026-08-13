@@ -9,6 +9,9 @@ import { formatTemp } from "./src/lib/units.js";
 import { formatLocalTime } from "./src/lib/time.js";
 import { groupByDay, dailySummary } from "./src/lib/forecast.js";
 import { getErrorMessage } from "./src/lib/errors.js";
+import { getItem, setItem } from "./src/lib/storage.js";
+
+const UNIT_KEY = "awr_unit";
 
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-input");
@@ -27,6 +30,14 @@ const forecastCards = document.getElementById("forecast-cards");
 
 const spinner = document.getElementById("spinner");
 const inlineError = document.getElementById("inline-error");
+const unitToggle = document.getElementById("unit-toggle");
+
+// Raw (Celsius) data from the last successful search, kept around so the
+// unit toggle can re-render instantly without re-fetching.
+let lastCurrentData = null;
+let lastForecastData = null;
+
+let currentUnit = getItem(UNIT_KEY, "C");
 
 // Date formatting (e.g. "Tue, Aug 4") lives here rather than in
 // lib/time.js, since lib/time.js only owns the time-of-day portion —
@@ -54,7 +65,19 @@ function formatDayLabel(dateStr) {
   }).format(new Date(dateStr));
 }
 
+function updateUnitToggleUI() {
+  const isFahrenheit = currentUnit === "F";
+  unitToggle.querySelector("span").textContent = isFahrenheit ? "°F" : "°C";
+  unitToggle.setAttribute("aria-pressed", String(isFahrenheit));
+  unitToggle.setAttribute(
+    "aria-label",
+    isFahrenheit ? "Switch to Celsius" : "Switch to Fahrenheit",
+  );
+}
+
 function renderCurrentWeather(data) {
+  lastCurrentData = data;
+
   const country = data.sys?.country ? `, ${data.sys.country}` : "";
   weatherCity.textContent = `${data.name}${country}`;
 
@@ -68,16 +91,18 @@ function renderCurrentWeather(data) {
     : "";
   weatherIcon.alt = data.weather?.[0]?.description ?? "";
 
-  // Hardcoded to Celsius for now — the °C/°F toggle is wired in Step 17.
-  weatherTemp.textContent = formatTemp(data.main.temp, "C");
+  weatherTemp.textContent = formatTemp(data.main.temp, currentUnit);
   weatherCondition.textContent = data.weather?.[0]?.description ?? "";
   weatherHumidity.textContent = `${data.main.humidity}%`;
+  // Wind speed stays in m/s regardless of the °C/°F toggle (§4.5).
   weatherWind.textContent = `${data.wind.speed} m/s`;
 
   currentWeatherSection.hidden = false;
 }
 
 function renderForecast(data) {
+  lastForecastData = data;
+
   const utcOffsetSeconds = data.city?.timezone ?? 0;
   const groups = groupByDay(data.list, utcOffsetSeconds);
   const summaries = Object.keys(groups)
@@ -102,8 +127,7 @@ function renderForecast(data) {
 
     const temps = document.createElement("p");
     temps.className = "forecast-card__temps";
-    // Hardcoded to Celsius for now — the °C/°F toggle is wired in Step 17.
-    temps.textContent = `${formatTemp(day.max, "C")} / ${formatTemp(day.min, "C")}`;
+    temps.textContent = `${formatTemp(day.max, currentUnit)} / ${formatTemp(day.min, currentUnit)}`;
 
     const condition = document.createElement("p");
     condition.className = "forecast-card__condition";
@@ -153,3 +177,17 @@ searchForm.addEventListener("submit", (event) => {
       spinner.hidden = true;
     });
 });
+
+unitToggle.addEventListener("click", () => {
+  currentUnit = currentUnit === "C" ? "F" : "C";
+  setItem(UNIT_KEY, currentUnit);
+  updateUnitToggleUI();
+
+  // Re-render from the last fetched data — no re-fetch needed (§4.5).
+  if (lastCurrentData) renderCurrentWeather(lastCurrentData);
+  if (lastForecastData) renderForecast(lastForecastData);
+});
+
+// Apply the persisted (or default) unit preference to the toggle control
+// itself on load, ahead of any search.
+updateUnitToggleUI();
