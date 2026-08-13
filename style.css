@@ -1,13 +1,13 @@
 /* ---------------------------------------------------------------------
-  Alpha Weather Report — base styles (Phase C, Step 10)
-  Light theme only for now. Dark theme variables land in Step 19.
-  Responsive breakpoints land in Step 26.
+   Alpha Weather Report — base styles (Phase C, Step 10)
+   Light theme only for now. Dark theme variables land in Step 19.
+   Responsive breakpoints land in Step 26.
    --------------------------------------------------------------------- */
 
 :root {
   /* Color — an atmospheric, instrument-panel palette: pale sky surface,
-    deep slate ink, warm sun-amber accent. Deliberately not the
-    cream+terracotta or near-black+neon defaults. */
+     deep slate ink, warm sun-amber accent. Deliberately not the
+     cream+terracotta or near-black+neon defaults. */
   --color-bg: #eef3f7;
   --color-surface: #ffffff;
   --color-surface-alt: #f7fafc;
@@ -311,4 +311,33 @@ body {
   border-radius: var(--radius-card);
   padding: var(--space-3);
   text-align: center;
+}
+
+.forecast-card__day {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.forecast-card__icon {
+  width: 44px;
+  height: 44px;
+  margin: var(--space-1) 0;
+}
+
+.forecast-card__temps {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  margin: var(--space-1) 0 0;
+}
+
+.forecast-card__condition {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  text-transform: capitalize;
+  margin: var(--space-1) 0 0;
 }
