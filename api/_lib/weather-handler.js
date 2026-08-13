@@ -21,7 +21,9 @@ export async function handleWeatherRequest(
     url.searchParams.set(key, value);
   }
   url.searchParams.set("appid", apiKey);
-  url.searchParams.set("units", "metric");
+  if (query.type !== "geocode") {
+    url.searchParams.set("units", "metric");
+  }
 
   try {
     const response = await fetchImpl(url.toString());
@@ -43,7 +45,6 @@ export async function handleWeatherRequest(
     }
     return { status: 200, body: data };
   } catch (err) {
-    console.log(JSON.stringify(apiKey), "length:", apiKey?.length);
     console.error("Fetch to OpenWeather threw:", err);
     return { status: 502, body: { error: "upstream weather service failed" } };
   }
