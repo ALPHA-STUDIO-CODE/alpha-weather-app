@@ -6,8 +6,7 @@ export class WeatherApiError extends Error {
   }
 }
 
-export async function fetchCurrentWeather(city) {
-  const url = `/api/weather?type=current&city=${encodeURIComponent(city)}`;
+async function fetchWeatherEndpoint(url) {
   const response = await fetch(url);
   const data = await response.json();
 
@@ -17,4 +16,14 @@ export async function fetchCurrentWeather(city) {
   }
 
   return data;
+}
+
+export async function fetchCurrentWeather(city) {
+  const url = `/api/weather?type=current&city=${encodeURIComponent(city)}`;
+  return fetchWeatherEndpoint(url);
+}
+
+export async function fetchForecast(city) {
+  const url = `/api/weather?type=forecast&city=${encodeURIComponent(city)}`;
+  return fetchWeatherEndpoint(url);
 }

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { fetchCurrentWeather, WeatherApiError } from "./apiClient.js";
+import { fetchCurrentWeather, fetchForecast, WeatherApiError } from "./apiClient.js";
 
 function mockFetch(status, body) {
   return async () => ({
@@ -52,4 +52,46 @@ test("fetchCurrentWeather URL-encodes the city name", async () => {
   await fetchCurrentWeather("New York");
   assert.ok(capturedUrl.includes("city=New%20York"));
   assert.ok(capturedUrl.startsWith("/api/weather?type=current"));
+});
+
+test("fetchForecast returns parsed JSON on success", async () => {
+  globalThis.fetch = mockFetch(200, { list: [{ dt: 1, main: { temp: 20 } }] });
+  const result = await fetchForecast("Abuja");
+  assert.equal(result.list.length, 1);
+});
+
+test("fetchForecast throws a typed 'not_found' error on 404", async () => {
+  globalThis.fetch = mockFetch(404, { error: "city not found" });
+  await assert.rejects(
+    () => fetchForecast("Xyzzzzz"),
+    (err) => {
+      assert.ok(err instanceof WeatherApiError);
+      assert.equal(err.type, "not_found");
+      return true;
+    },
+  );
+});
+
+test("fetchForecast throws a typed 'generic' error on other non-OK statuses", async () => {
+  globalThis.fetch = mockFetch(502, {
+    error: "upstream weather service failed",
+  });
+  await assert.rejects(
+    () => fetchForecast("Abuja"),
+    (err) => {
+      assert.ok(err instanceof WeatherApiError);
+      assert.equal(err.type, "generic");
+      return true;
+    },
+  );
+});
+
+test("fetchForecast hits the forecast endpoint, not current", async () => {
+  let capturedUrl;
+  globalThis.fetch = async (url) => {
+    capturedUrl = url;
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  await fetchForecast("Abuja");
+  assert.ok(capturedUrl.startsWith("/api/weather?type=forecast"));
 });
