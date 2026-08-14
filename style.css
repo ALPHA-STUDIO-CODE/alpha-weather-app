@@ -44,6 +44,22 @@
   box-sizing: border-box;
 }
 
+/* Dark theme — same instrument-panel palette, inverted. The accent
+  brightens slightly since the deep amber reads muddy against a dark
+   surface. Swapped in via body.dark-mode. */
+body.dark-mode {
+  --color-bg: #0f1720;
+  --color-surface: #1a2532;
+  --color-surface-alt: #212e3d;
+  --color-border: #2c3b4c;
+  --color-text-primary: #eef3f7;
+  --color-text-secondary: #93a5b8;
+  --color-accent: #e8a33d;
+  --color-accent-deep: #f0b869;
+  --color-error: #ff6b5e;
+  --color-error-bg: #3a1f1c;
+}
+
 body {
   margin: 0;
   background: var(--color-bg);
@@ -51,6 +67,9 @@ body {
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.5;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 #app {
@@ -237,6 +256,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .spinner {
     animation-duration: 2.4s;
+  }
+
+  body {
+    transition: none;
   }
 }
 

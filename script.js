@@ -12,6 +12,7 @@ import { getErrorMessage } from "./src/lib/errors.js";
 import { getItem, setItem } from "./src/lib/storage.js";
 
 const UNIT_KEY = "awr_unit";
+const THEME_KEY = "awr_theme";
 
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-input");
@@ -31,6 +32,7 @@ const forecastCards = document.getElementById("forecast-cards");
 const spinner = document.getElementById("spinner");
 const inlineError = document.getElementById("inline-error");
 const unitToggle = document.getElementById("unit-toggle");
+const themeToggle = document.getElementById("theme-toggle");
 
 // Raw (Celsius) data from the last successful search, kept around so the
 // unit toggle can re-render instantly without re-fetching.
@@ -38,6 +40,7 @@ let lastCurrentData = null;
 let lastForecastData = null;
 
 let currentUnit = getItem(UNIT_KEY, "C");
+let currentTheme = getItem(THEME_KEY, "light");
 
 // Date formatting (e.g. "Tue, Aug 4") lives here rather than in
 // lib/time.js, since lib/time.js only owns the time-of-day portion —
@@ -72,6 +75,17 @@ function updateUnitToggleUI() {
   unitToggle.setAttribute(
     "aria-label",
     isFahrenheit ? "Switch to Celsius" : "Switch to Fahrenheit",
+  );
+}
+
+function updateThemeToggleUI() {
+  const isDark = currentTheme === "dark";
+  document.body.classList.toggle("dark-mode", isDark);
+  themeToggle.querySelector("span").textContent = isDark ? "☀" : "☾";
+  themeToggle.setAttribute("aria-pressed", String(isDark));
+  themeToggle.setAttribute(
+    "aria-label",
+    isDark ? "Switch to light mode" : "Switch to dark mode",
   );
 }
 
@@ -188,6 +202,13 @@ unitToggle.addEventListener("click", () => {
   if (lastForecastData) renderForecast(lastForecastData);
 });
 
-// Apply the persisted (or default) unit preference to the toggle control
-// itself on load, ahead of any search.
+themeToggle.addEventListener("click", () => {
+  currentTheme = currentTheme === "dark" ? "light" : "dark";
+  setItem(THEME_KEY, currentTheme);
+  updateThemeToggleUI();
+});
+
+// Apply the persisted (or default) preferences to both toggle controls
+// on load, ahead of any search.
 updateUnitToggleUI();
+updateThemeToggleUI();
