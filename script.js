@@ -3,6 +3,7 @@
 import {
   fetchCurrentWeather,
   fetchForecast,
+  geocode,
   WeatherApiError,
 } from "./src/apiClient.js";
 import { formatTemp } from "./src/lib/units.js";
@@ -11,12 +12,16 @@ import { groupByDay, dailySummary } from "./src/lib/forecast.js";
 import { getErrorMessage } from "./src/lib/errors.js";
 import { addSearch } from "./src/lib/recentSearches.js";
 import { getItem, setItem } from "./src/lib/storage.js";
+import { debounce } from "./src/lib/debounce.js";
 
 const UNIT_KEY = "awr_unit";
 const THEME_KEY = "awr_theme";
 const RECENT_KEY = "awr_recent_searches";
 const LAST_CITY_KEY = "awr_last_city";
 const DEFAULT_CITY = "Abuja";
+const AUTOCOMPLETE_MIN_CHARS = 2;
+const AUTOCOMPLETE_DEBOUNCE_MS = 300;
+const AUTOCOMPLETE_MAX_SUGGESTIONS = 5;
 
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-input");
@@ -38,6 +43,7 @@ const inlineError = document.getElementById("inline-error");
 const unitToggle = document.getElementById("unit-toggle");
 const themeToggle = document.getElementById("theme-toggle");
 const recentChipsContainer = document.getElementById("recent-chips");
+const autocompleteList = document.getElementById("autocomplete-list");
 
 // Raw (Celsius) data from the last successful search, kept around so the
 // unit toggle can re-render instantly without re-fetching.
@@ -47,6 +53,10 @@ let lastForecastData = null;
 let currentUnit = getItem(UNIT_KEY, "C");
 let currentTheme = getItem(THEME_KEY, "light");
 let recentSearches = getItem(RECENT_KEY, []);
+
+// Current geocode suggestions backing the dropdown — selection and
+// keyboard navigation over this list land in Step 25.
+let currentSuggestions = [];
 
 // Date formatting (e.g. "Tue, Aug 4") lives here rather than in
 // lib/time.js, since lib/time.js only owns the time-of-day portion —
@@ -160,6 +170,60 @@ function renderForecast(data) {
   forecastSection.hidden = false;
 }
 
+function hideSuggestions() {
+  currentSuggestions = [];
+  autocompleteList.innerHTML = "";
+  autocompleteList.hidden = true;
+}
+
+function renderSuggestions(suggestions) {
+  autocompleteList.innerHTML = "";
+
+  if (suggestions.length === 0) {
+    autocompleteList.hidden = true;
+    return;
+  }
+
+  suggestions.forEach((suggestion, index) => {
+    const item = document.createElement("li");
+    item.id = `suggestion-${index}`;
+    item.className = "autocomplete-list__item";
+    item.setAttribute("role", "option");
+    item.textContent = `${suggestion.name}, ${suggestion.country}`;
+    autocompleteList.appendChild(item);
+  });
+
+  autocompleteList.hidden = false;
+}
+
+async function fetchSuggestions(query) {
+  try {
+    const results = await geocode(query);
+    currentSuggestions = results.slice(0, AUTOCOMPLETE_MAX_SUGGESTIONS);
+    renderSuggestions(currentSuggestions);
+  } catch {
+    // Autocomplete is a convenience layer, not a critical path — a
+    // failed suggestion lookup just means no dropdown, silently.
+    hideSuggestions();
+  }
+}
+
+const debouncedFetchSuggestions = debounce(
+  fetchSuggestions,
+  AUTOCOMPLETE_DEBOUNCE_MS,
+);
+
+searchInput.addEventListener("input", () => {
+  const query = searchInput.value.trim();
+
+  if (query.length < AUTOCOMPLETE_MIN_CHARS) {
+    hideSuggestions();
+    return;
+  }
+
+  debouncedFetchSuggestions(query);
+});
+
 function renderRecentChips() {
   recentChipsContainer.innerHTML = "";
 
@@ -195,6 +259,7 @@ async function handleSearch(city) {
 }
 
 async function runSearch(city) {
+  hideSuggestions();
   spinner.hidden = false;
 
   try {

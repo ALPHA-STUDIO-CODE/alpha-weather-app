@@ -219,6 +219,19 @@ body {
   box-shadow: 0 8px 24px rgba(28, 43, 58, 0.08);
 }
 
+.autocomplete-list__item {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.autocomplete-list__item:hover {
+  background: var(--color-surface-alt);
+}
+
 .recent-chips {
   display: flex;
   flex-wrap: wrap;
