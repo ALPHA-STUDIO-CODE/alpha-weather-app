@@ -15,6 +15,8 @@ import { getItem, setItem } from "./src/lib/storage.js";
 const UNIT_KEY = "awr_unit";
 const THEME_KEY = "awr_theme";
 const RECENT_KEY = "awr_recent_searches";
+const LAST_CITY_KEY = "awr_last_city";
+const DEFAULT_CITY = "Abuja";
 
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-input");
@@ -214,6 +216,9 @@ async function runSearch(city) {
       recentSearches = addSearch(recentSearches, entry);
       setItem(RECENT_KEY, recentSearches);
       renderRecentChips();
+
+      // Remember this as the city to auto-load next visit (Step 22).
+      setItem(LAST_CITY_KEY, lastCurrentData.name);
     }
   } catch (err) {
     // Show the mapped message inline; the existing weather display is
@@ -252,9 +257,17 @@ themeToggle.addEventListener("click", () => {
   updateThemeToggleUI();
 });
 
+// Smart initial load (Step 22): restore the last-searched city, or
+// fall back to Abuja if this is a first visit / storage was blocked.
+// Triggered before the toggle/chip init below — runSearch's first
+// await yields control immediately, so the request is already in
+// flight while the rest of page init runs synchronously.
+const initialCity = getItem(LAST_CITY_KEY, null) ?? DEFAULT_CITY;
+searchInput.value = initialCity;
+runSearch(initialCity);
+
 // Apply the persisted (or default) preferences to both toggle controls
-// and render any persisted recent-search chips, on load, ahead of any
-// search.
+// and render any persisted recent-search chips.
 updateUnitToggleUI();
 updateThemeToggleUI();
 renderRecentChips();
