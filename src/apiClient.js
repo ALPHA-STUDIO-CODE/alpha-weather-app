@@ -27,3 +27,8 @@ export async function fetchForecast(city) {
   const url = `/api/weather?type=forecast&city=${encodeURIComponent(city)}`;
   return fetchWeatherEndpoint(url);
 }
+
+export async function geocode(query) {
+  const url = `/api/weather?type=geocode&q=${encodeURIComponent(query)}`;
+  return fetchWeatherEndpoint(url);
+}
