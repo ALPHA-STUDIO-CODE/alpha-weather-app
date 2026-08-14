@@ -59,6 +59,30 @@ test("fetchCurrentWeather URL-encodes the city name", async () => {
   assert.ok(capturedUrl.startsWith("/api/weather?type=current"));
 });
 
+test("fetchCurrentWeather accepts a {lat, lon} location instead of a city name", async () => {
+  let capturedUrl;
+  globalThis.fetch = async (url) => {
+    capturedUrl = url;
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  await fetchCurrentWeather({ lat: 51.51, lon: -0.13 });
+  assert.ok(capturedUrl.includes("lat=51.51"));
+  assert.ok(capturedUrl.includes("lon=-0.13"));
+  assert.ok(!capturedUrl.includes("city="));
+});
+
+test("fetchForecast accepts a {lat, lon} location instead of a city name", async () => {
+  let capturedUrl;
+  globalThis.fetch = async (url) => {
+    capturedUrl = url;
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  await fetchForecast({ lat: 9.06, lon: 7.49 });
+  assert.ok(capturedUrl.startsWith("/api/weather?type=forecast"));
+  assert.ok(capturedUrl.includes("lat=9.06"));
+  assert.ok(capturedUrl.includes("lon=7.49"));
+});
+
 test("fetchForecast returns parsed JSON on success", async () => {
   globalThis.fetch = mockFetch(200, { list: [{ dt: 1, main: { temp: 20 } }] });
   const result = await fetchForecast("Abuja");

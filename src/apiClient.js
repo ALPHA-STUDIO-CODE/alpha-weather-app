@@ -18,13 +18,24 @@ async function fetchWeatherEndpoint(url) {
   return data;
 }
 
-export async function fetchCurrentWeather(city) {
-  const url = `/api/weather?type=current&city=${encodeURIComponent(city)}`;
+// Both `fetchCurrentWeather` and `fetchForecast` accept either a city
+// name string or a {lat, lon} object — the backend already supports
+// both (api/_lib/weather-request.js), so this just mirrors that on the
+// client for autocomplete-selected suggestions (Step 25).
+function buildLocationQuery(location) {
+  if (typeof location === "object" && location !== null) {
+    return `lat=${encodeURIComponent(location.lat)}&lon=${encodeURIComponent(location.lon)}`;
+  }
+  return `city=${encodeURIComponent(location)}`;
+}
+
+export async function fetchCurrentWeather(location) {
+  const url = `/api/weather?type=current&${buildLocationQuery(location)}`;
   return fetchWeatherEndpoint(url);
 }
 
-export async function fetchForecast(city) {
-  const url = `/api/weather?type=forecast&city=${encodeURIComponent(city)}`;
+export async function fetchForecast(location) {
+  const url = `/api/weather?type=forecast&${buildLocationQuery(location)}`;
   return fetchWeatherEndpoint(url);
 }
 

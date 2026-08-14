@@ -232,6 +232,12 @@ body {
   background: var(--color-surface-alt);
 }
 
+.autocomplete-list__item.is-highlighted {
+  background: var(--color-surface-alt);
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: -2px;
+}
+
 .recent-chips {
   display: flex;
   flex-wrap: wrap;

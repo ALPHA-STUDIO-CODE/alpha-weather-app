@@ -54,9 +54,10 @@ let currentUnit = getItem(UNIT_KEY, "C");
 let currentTheme = getItem(THEME_KEY, "light");
 let recentSearches = getItem(RECENT_KEY, []);
 
-// Current geocode suggestions backing the dropdown — selection and
-// keyboard navigation over this list land in Step 25.
+// Current geocode suggestions backing the dropdown, and which one (if
+// any) is keyboard-highlighted.
 let currentSuggestions = [];
+let highlightedIndex = -1;
 
 // Date formatting (e.g. "Tue, Aug 4") lives here rather than in
 // lib/time.js, since lib/time.js only owns the time-of-day portion —
@@ -172,12 +173,42 @@ function renderForecast(data) {
 
 function hideSuggestions() {
   currentSuggestions = [];
+  highlightedIndex = -1;
   autocompleteList.innerHTML = "";
   autocompleteList.hidden = true;
+  searchInput.removeAttribute("aria-activedescendant");
+}
+
+function updateHighlight() {
+  const items = autocompleteList.querySelectorAll(".autocomplete-list__item");
+  items.forEach((item, index) => {
+    const isHighlighted = index === highlightedIndex;
+    item.classList.toggle("is-highlighted", isHighlighted);
+    item.setAttribute("aria-selected", String(isHighlighted));
+  });
+
+  if (highlightedIndex >= 0) {
+    searchInput.setAttribute(
+      "aria-activedescendant",
+      `suggestion-${highlightedIndex}`,
+    );
+  } else {
+    searchInput.removeAttribute("aria-activedescendant");
+  }
+}
+
+function selectSuggestion(suggestion) {
+  searchInput.value = `${suggestion.name}, ${suggestion.country}`;
+  hideSuggestions();
+  // Fetch by lat/lon rather than re-resolving the name — reuses the
+  // exact same search/render pipeline as everywhere else (Step 12/14),
+  // just extended to accept lat/lon (§4.1 + Step 25 definition of done).
+  runSearch({ lat: suggestion.lat, lon: suggestion.lon });
 }
 
 function renderSuggestions(suggestions) {
   autocompleteList.innerHTML = "";
+  highlightedIndex = -1;
 
   if (suggestions.length === 0) {
     autocompleteList.hidden = true;
@@ -189,7 +220,15 @@ function renderSuggestions(suggestions) {
     item.id = `suggestion-${index}`;
     item.className = "autocomplete-list__item";
     item.setAttribute("role", "option");
+    item.setAttribute("aria-selected", "false");
     item.textContent = `${suggestion.name}, ${suggestion.country}`;
+
+    item.addEventListener("mouseenter", () => {
+      highlightedIndex = index;
+      updateHighlight();
+    });
+    item.addEventListener("click", () => selectSuggestion(suggestion));
+
     autocompleteList.appendChild(item);
   });
 
@@ -224,6 +263,46 @@ searchInput.addEventListener("input", () => {
   debouncedFetchSuggestions(query);
 });
 
+searchInput.addEventListener("keydown", (event) => {
+  const isDropdownOpen =
+    !autocompleteList.hidden && currentSuggestions.length > 0;
+
+  if (!isDropdownOpen) return;
+
+  switch (event.key) {
+    case "ArrowDown":
+      event.preventDefault();
+      highlightedIndex = (highlightedIndex + 1) % currentSuggestions.length;
+      updateHighlight();
+      break;
+    case "ArrowUp":
+      event.preventDefault();
+      highlightedIndex =
+        (highlightedIndex - 1 + currentSuggestions.length) %
+        currentSuggestions.length;
+      updateHighlight();
+      break;
+    case "Enter":
+      // Only intercept Enter when a suggestion is actually highlighted —
+      // otherwise let the form's own submit handler run as normal.
+      if (highlightedIndex >= 0) {
+        event.preventDefault();
+        selectSuggestion(currentSuggestions[highlightedIndex]);
+      }
+      break;
+    case "Escape":
+      // Closes the dropdown only — never fires a search.
+      hideSuggestions();
+      break;
+  }
+});
+
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".search-form__field")) {
+    hideSuggestions();
+  }
+});
+
 function renderRecentChips() {
   recentChipsContainer.innerHTML = "";
 
@@ -249,21 +328,21 @@ function renderRecentChips() {
   recentChipsContainer.hidden = false;
 }
 
-async function handleSearch(city) {
+async function handleSearch(location) {
   const [current, forecast] = await Promise.all([
-    fetchCurrentWeather(city),
-    fetchForecast(city),
+    fetchCurrentWeather(location),
+    fetchForecast(location),
   ]);
   renderCurrentWeather(current);
   renderForecast(forecast);
 }
 
-async function runSearch(city) {
+async function runSearch(location) {
   hideSuggestions();
   spinner.hidden = false;
 
   try {
-    await handleSearch(city);
+    await handleSearch(location);
 
     // A successful search clears any error left over from a previous
     // failed one.
