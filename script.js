@@ -9,10 +9,12 @@ import { formatTemp } from "./src/lib/units.js";
 import { formatLocalTime } from "./src/lib/time.js";
 import { groupByDay, dailySummary } from "./src/lib/forecast.js";
 import { getErrorMessage } from "./src/lib/errors.js";
+import { addSearch } from "./src/lib/recentSearches.js";
 import { getItem, setItem } from "./src/lib/storage.js";
 
 const UNIT_KEY = "awr_unit";
 const THEME_KEY = "awr_theme";
+const RECENT_KEY = "awr_recent_searches";
 
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-input");
@@ -33,6 +35,7 @@ const spinner = document.getElementById("spinner");
 const inlineError = document.getElementById("inline-error");
 const unitToggle = document.getElementById("unit-toggle");
 const themeToggle = document.getElementById("theme-toggle");
+const recentChipsContainer = document.getElementById("recent-chips");
 
 // Raw (Celsius) data from the last successful search, kept around so the
 // unit toggle can re-render instantly without re-fetching.
@@ -41,6 +44,7 @@ let lastForecastData = null;
 
 let currentUnit = getItem(UNIT_KEY, "C");
 let currentTheme = getItem(THEME_KEY, "light");
+let recentSearches = getItem(RECENT_KEY, []);
 
 // Date formatting (e.g. "Tue, Aug 4") lives here rather than in
 // lib/time.js, since lib/time.js only owns the time-of-day portion —
@@ -154,6 +158,31 @@ function renderForecast(data) {
   forecastSection.hidden = false;
 }
 
+function renderRecentChips() {
+  recentChipsContainer.innerHTML = "";
+
+  if (recentSearches.length === 0) {
+    recentChipsContainer.hidden = true;
+    return;
+  }
+
+  for (const entry of recentSearches) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.textContent = `${entry.name}, ${entry.country}`;
+    // Reuses the exact same search path as manual search — no duplicate
+    // search logic (Step 21).
+    chip.addEventListener("click", () => {
+      searchInput.value = entry.name;
+      runSearch(entry.name);
+    });
+    recentChipsContainer.appendChild(chip);
+  }
+
+  recentChipsContainer.hidden = false;
+}
+
 async function handleSearch(city) {
   const [current, forecast] = await Promise.all([
     fetchCurrentWeather(city),
@@ -163,6 +192,40 @@ async function handleSearch(city) {
   renderForecast(forecast);
 }
 
+async function runSearch(city) {
+  spinner.hidden = false;
+
+  try {
+    await handleSearch(city);
+
+    // A successful search clears any error left over from a previous
+    // failed one.
+    inlineError.hidden = true;
+
+    // renderCurrentWeather (called inside handleSearch) just updated
+    // lastCurrentData, so it reflects this search's result.
+    if (lastCurrentData) {
+      const entry = {
+        name: lastCurrentData.name,
+        country: lastCurrentData.sys?.country ?? "",
+        lat: lastCurrentData.coord?.lat,
+        lon: lastCurrentData.coord?.lon,
+      };
+      recentSearches = addSearch(recentSearches, entry);
+      setItem(RECENT_KEY, recentSearches);
+      renderRecentChips();
+    }
+  } catch (err) {
+    // Show the mapped message inline; the existing weather display is
+    // deliberately left untouched (§5.4) — nothing here clears it.
+    const type = err instanceof WeatherApiError ? err.type : "generic";
+    inlineError.textContent = getErrorMessage(type);
+    inlineError.hidden = false;
+  } finally {
+    spinner.hidden = true;
+  }
+}
+
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const city = searchInput.value.trim();
@@ -170,26 +233,7 @@ searchForm.addEventListener("submit", (event) => {
   // Empty submit does nothing — no request fired, no error shown (§5.1).
   if (!city) return;
 
-  spinner.hidden = false;
-
-  handleSearch(city)
-    .then(() => {
-      // A successful search clears any error left over from a previous
-      // failed one.
-      inlineError.hidden = true;
-    })
-    .catch((err) => {
-      // Show the mapped message inline; the existing weather display is
-      // deliberately left untouched (§5.4) — nothing here clears it.
-      const type = err instanceof WeatherApiError ? err.type : "generic";
-      inlineError.textContent = getErrorMessage(type);
-      inlineError.hidden = false;
-    })
-    .finally(() => {
-      // .finally() runs on both the success and failure paths, so the
-      // spinner always clears once both requests have settled.
-      spinner.hidden = true;
-    });
+  runSearch(city);
 });
 
 unitToggle.addEventListener("click", () => {
@@ -209,6 +253,8 @@ themeToggle.addEventListener("click", () => {
 });
 
 // Apply the persisted (or default) preferences to both toggle controls
-// on load, ahead of any search.
+// and render any persisted recent-search chips, on load, ahead of any
+// search.
 updateUnitToggleUI();
 updateThemeToggleUI();
+renderRecentChips();
