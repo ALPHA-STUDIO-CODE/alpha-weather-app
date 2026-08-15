@@ -1,13 +1,8 @@
 /* ---------------------------------------------------------------------
-   Alpha Weather Report — base styles (Phase C, Step 10)
-   Light theme only for now. Dark theme variables land in Step 19.
-   Responsive breakpoints land in Step 26.
+    Alpha Weather Report — base styles
    --------------------------------------------------------------------- */
 
 :root {
-  /* Color — an atmospheric, instrument-panel palette: pale sky surface,
-     deep slate ink, warm sun-amber accent. Deliberately not the
-     cream+terracotta or near-black+neon defaults. */
   --color-bg: #eef3f7;
   --color-surface: #ffffff;
   --color-surface-alt: #f7fafc;
@@ -15,12 +10,10 @@
   --color-text-primary: #1c2b3a;
   --color-text-secondary: #5b7086;
   --color-accent: #e8a33d;
-  --color-accent-deep: #c97f1e;
-  --color-error: #c4453a;
+  --color-accent-deep: #a86617;
+  --color-error: #a3332a;
   --color-error-bg: #fbeae8;
 
-  /* Type — Space Grotesk for display/data readouts, Inter for body copy,
-     IBM Plex Mono for small instrument-style data labels. */
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
@@ -44,9 +37,7 @@
   box-sizing: border-box;
 }
 
-/* Dark theme — same instrument-panel palette, inverted. The accent
-  brightens slightly since the deep amber reads muddy against a dark
-   surface. Swapped in via body.dark-mode. */
+/* Dark theme */
 body.dark-mode {
   --color-bg: #0f1720;
   --color-surface: #1a2532;
@@ -58,6 +49,13 @@ body.dark-mode {
   --color-accent-deep: #f0b869;
   --color-error: #ff6b5e;
   --color-error-bg: #3a1f1c;
+}
+
+/* Dark mode: OpenWeather's icon PNGs */
+body.dark-mode .weather-card__icon,
+body.dark-mode .forecast-card__icon {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45)) contrast(1.08)
+    brightness(1.04);
 }
 
 body {
@@ -136,8 +134,6 @@ body {
   outline-offset: 2px;
 }
 
-/* Signature element: a thin sky-to-horizon gradient rule beneath the
-   header, standing in for the app's subject in a single quiet stroke. */
 .horizon-divider {
   height: 2px;
   margin: var(--space-4) 0 var(--space-6);
