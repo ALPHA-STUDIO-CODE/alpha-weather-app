@@ -2,13 +2,11 @@ function localDateString(dt, utcOffsetSeconds) {
   const localMs = (dt + utcOffsetSeconds) * 1000;
   return new Date(localMs).toISOString().slice(0, 10);
 }
-
 function localHourFraction(dt, utcOffsetSeconds) {
   const localMs = (dt + utcOffsetSeconds) * 1000;
   const date = new Date(localMs);
   return date.getUTCHours() + date.getUTCMinutes() / 60;
 }
-
 export function groupByDay(entries, utcOffsetSeconds) {
   const groups = {};
   for (const entry of entries) {
@@ -18,7 +16,6 @@ export function groupByDay(entries, utcOffsetSeconds) {
   }
   return groups;
 }
-
 export function dailySummary(dayEntries, utcOffsetSeconds) {
   const temps = dayEntries.map((e) => e.main.temp);
   const min = Math.min(...temps);

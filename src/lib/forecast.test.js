@@ -1,13 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { groupByDay, dailySummary } from "./forecast.js";
-
 const OFFSET = 3600;
-
 function entry(dt, temp, icon, description) {
   return { dt, main: { temp }, weather: [{ icon, description }] };
 }
-
 const day1 = [
   entry(1704067200, 10, "a0", "cond0"),
   entry(1704078000, 12, "a1", "cond1"),
@@ -18,7 +15,6 @@ const day1 = [
   entry(1704132000, 18, "a6", "cond6"),
   entry(1704142800, 14, "a7", "cond7"),
 ];
-
 const day2 = [
   entry(1704153600, 5, "b0", "cond0b"),
   entry(1704164400, 8, "b1", "cond1b"),
@@ -29,9 +25,7 @@ const day2 = [
   entry(1704218400, 15, "b6", "cond6b"),
   entry(1704229200, 7, "b7", "cond7b"),
 ];
-
 const allEntries = [...day1, ...day2];
-
 test("groupByDay splits entries into correct calendar-day buckets using local offset", () => {
   const groups = groupByDay(allEntries, OFFSET);
   const dates = Object.keys(groups).sort();
@@ -39,19 +33,16 @@ test("groupByDay splits entries into correct calendar-day buckets using local of
   assert.equal(groups[dates[0]].length, 8);
   assert.equal(groups[dates[1]].length, 8);
 });
-
 test("dailySummary computes correct min/max for the day", () => {
   const summary = dailySummary(day1, OFFSET);
   assert.equal(summary.min, 10);
   assert.equal(summary.max, 25);
 });
-
 test("dailySummary picks the reading closest to midday (12:00-15:00) for icon/condition", () => {
   const summary = dailySummary(day1, OFFSET);
   assert.equal(summary.icon, "a4");
   assert.equal(summary.condition, "cond4");
 });
-
 test("dailySummary works correctly on a second, distinct day", () => {
   const summary = dailySummary(day2, OFFSET);
   assert.equal(summary.min, 5);
@@ -59,12 +50,10 @@ test("dailySummary works correctly on a second, distinct day", () => {
   assert.equal(summary.icon, "b4");
   assert.equal(summary.condition, "cond4b");
 });
-
 test("dailySummary includes the correct local calendar date", () => {
   const summary = dailySummary(day1, OFFSET);
   assert.equal(summary.date, "2024-01-01");
 });
-
 test("groupByDay + dailySummary together produce 5 or fewer day summaries from a real-shaped 40-entry dataset", () => {
   const start = 1704074400;
   const entries40 = Array.from({ length: 40 }, (_, i) =>

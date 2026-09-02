@@ -1,11 +1,9 @@
 import SearchForm from './components/SearchForm.jsx';
 import CurrentWeatherCard from './components/CurrentWeatherCard.jsx';
+import { useWeather } from './hooks/useWeather.js';
 
 function App() {
-  // Step 6 replaces this with useWeather's search(location).
-  function handleSearch(city) {
-    console.log('search:', city);
-  }
+  const { data, loading, error, search } = useWeather();
 
   return (
     <div id="app">
@@ -14,9 +12,9 @@ function App() {
       </header>
       <main className="main">
         <section className="search-section" aria-label="City search">
-          <SearchForm onSearch={handleSearch} />
+          <SearchForm onSearch={search} />
         </section>
-        <CurrentWeatherCard />
+        <CurrentWeatherCard data={data} loading={loading} error={error} />
       </main>
     </div>
   );

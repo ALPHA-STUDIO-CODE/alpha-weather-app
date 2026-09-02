@@ -16,7 +16,6 @@ export function getItem(key, fallback) {
     return fallback;
   }
 }
-
 export function setItem(key, value) {
   try {
     if (typeof localStorage === "undefined" || !localStorage) {
@@ -25,5 +24,6 @@ export function setItem(key, value) {
     const serialized =
       typeof value === "string" ? value : JSON.stringify(value);
     localStorage.setItem(key, serialized);
-  } catch {}
+  } catch {
+  }
 }

@@ -1,9 +1,7 @@
 const BASE_URL = "https://api.openweathermap.org";
 const VALID_TYPES = ["current", "forecast", "geocode"];
-
 export function buildUpstreamRequest(query) {
   const { type } = query;
-
   if (!type || !VALID_TYPES.includes(type)) {
     return {
       error: {
@@ -12,7 +10,6 @@ export function buildUpstreamRequest(query) {
       },
     };
   }
-
   if (type === "geocode") {
     if (!query.q) {
       return { error: { status: 400, message: "q is required for geocode" } };
@@ -22,9 +19,7 @@ export function buildUpstreamRequest(query) {
       params: { q: query.q, limit: 5 },
     };
   }
-
   const path = type === "current" ? "/data/2.5/weather" : "/data/2.5/forecast";
-
   if (query.lat && query.lon) {
     return {
       url: `${BASE_URL}${path}`,

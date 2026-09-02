@@ -1,7 +1,6 @@
 import { test, mock } from "node:test";
 import assert from "node:assert/strict";
 import { debounce } from "./debounce.js";
-
 test("rapid calls collapse into a single invocation after the delay", () => {
   mock.timers.enable({ apis: ["setTimeout"] });
   let callCount = 0;
@@ -16,7 +15,6 @@ test("rapid calls collapse into a single invocation after the delay", () => {
   assert.equal(callCount, 1);
   mock.timers.reset();
 });
-
 test("delay resets on each new call — only fires 300ms after the LAST call", () => {
   mock.timers.enable({ apis: ["setTimeout"] });
   let callCount = 0;
@@ -32,7 +30,6 @@ test("delay resets on each new call — only fires 300ms after the LAST call", (
   assert.equal(callCount, 1);
   mock.timers.reset();
 });
-
 test("the most recent call's arguments are the ones passed through", () => {
   mock.timers.enable({ apis: ["setTimeout"] });
   const received = [];
@@ -46,7 +43,6 @@ test("the most recent call's arguments are the ones passed through", () => {
   assert.deepEqual(received, ["third"]);
   mock.timers.reset();
 });
-
 test("separate quiet periods each produce their own invocation", () => {
   mock.timers.enable({ apis: ["setTimeout"] });
   let callCount = 0;
