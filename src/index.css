@@ -60,3 +60,8 @@ body {
     background-color 0.15s ease,
     color 0.15s ease;
 }
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
+}
