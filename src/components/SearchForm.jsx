@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState } from "react";
+import styles from "./SearchForm.module.css";
 
 /**
  * Search form for looking up a city's weather.
@@ -8,7 +9,7 @@ import { useState } from 'react';
  * submission is silently ignored rather than calling onSearch.
  */
 function SearchForm({ onSearch }) {
-  const [city, setCity] = useState('');
+  const [city, setCity] = useState("");
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -18,11 +19,7 @@ function SearchForm({ onSearch }) {
   }
 
   return (
-    <form
-      className="search-form"
-      autoComplete="off"
-      onSubmit={handleSubmit}
-    >
+    <form className="search-form" autoComplete="off" onSubmit={handleSubmit}>
       <div className="search-form__field">
         <label htmlFor="search-input" className="visually-hidden">
           Search for a city
@@ -37,7 +34,7 @@ function SearchForm({ onSearch }) {
           onChange={(event) => setCity(event.target.value)}
         />
       </div>
-      <button type="submit" className="search-form__button">
+      <button type="submit" className={`search-form__button ${styles.button}`}>
         Search
       </button>
     </form>
