@@ -1,9 +1,10 @@
 import SearchForm from './components/SearchForm.jsx';
 import CurrentWeatherCard from './components/CurrentWeatherCard.jsx';
+import ForecastCards from './components/ForecastCards.jsx';
 import { useWeather } from './hooks/useWeather.js';
 
 function App() {
-  const { data, loading, error, search } = useWeather();
+  const { data, forecast, loading, error, search } = useWeather();
 
   return (
     <div id="app">
@@ -15,6 +16,7 @@ function App() {
           <SearchForm onSearch={search} />
         </section>
         <CurrentWeatherCard data={data} loading={loading} error={error} />
+        <ForecastCards forecast={forecast} />
       </main>
     </div>
   );

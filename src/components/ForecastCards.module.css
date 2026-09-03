@@ -1,0 +1,47 @@
+.cards {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: var(--space-2);
+  -webkit-overflow-scrolling: touch;
+}
+
+.card {
+  flex: 0 0 132px;
+  scroll-snap-align: start;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: var(--space-3);
+  text-align: center;
+}
+
+.day {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.icon {
+  width: 44px;
+  height: 44px;
+  margin: var(--space-1) 0;
+}
+
+.temps {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  margin: var(--space-1) 0 0;
+}
+
+.condition {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  text-transform: capitalize;
+  margin: var(--space-1) 0 0;
+}
