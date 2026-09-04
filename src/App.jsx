@@ -2,6 +2,7 @@ import SearchForm from './components/SearchForm.jsx';
 import CurrentWeatherCard from './components/CurrentWeatherCard.jsx';
 import ForecastCards from './components/ForecastCards.jsx';
 import LoadingSpinner from './components/LoadingSpinner.jsx';
+import ErrorMessage from './components/ErrorMessage.jsx';
 import { useWeather } from './hooks/useWeather.js';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
       <main className="main">
         <section className="search-section" aria-label="City search">
           <SearchForm onSearch={search} />
+          <ErrorMessage error={error} />
         </section>
         <LoadingSpinner loading={loading} />
         <CurrentWeatherCard data={data} loading={loading} error={error} />
