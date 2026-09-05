@@ -1,4 +1,4 @@
-import styles from './UnitToggle.module.css';
+import styles from './ToggleButton.module.css';
 
 /**
  * Pill button toggling between °C and °F. The visible label,
