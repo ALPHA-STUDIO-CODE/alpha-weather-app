@@ -30,4 +30,24 @@ describe('useTheme', () => {
     expect(result.current.theme).toBe('light');
     expect(document.body.classList.contains('dark-mode')).toBe(false);
   });
+
+  it('reads a pre-existing awr_theme value from storage on mount', () => {
+    localStorage.setItem('awr_theme', 'dark');
+    const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe('dark');
+    expect(document.body.classList.contains('dark-mode')).toBe(true);
+  });
+
+  it('writes to storage on toggle, and a remount picks up the persisted value', () => {
+    const first = renderHook(() => useTheme());
+    act(() => {
+      first.result.current.toggleTheme();
+    });
+    expect(localStorage.getItem('awr_theme')).toBe('dark');
+
+    // Simulate a fresh page load: a brand-new hook instance, no state
+    // carried over except what's in storage.
+    const second = renderHook(() => useTheme());
+    expect(second.result.current.theme).toBe('dark');
+  });
 });

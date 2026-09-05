@@ -1,7 +1,10 @@
 import { useCallback, useState } from 'react';
+import { getItem, setItem } from '../lib/storage.js';
+
+const UNIT_KEY = 'awr_unit';
 
 /**
- * Holds unit state only ('C' | 'F') and a toggleUnit() to flip it.
+ * Holds unit state ('C' | 'F') and a toggleUnit() to flip it.
  *
  * No re-fetch on toggle — formatTemp (ported in Step 4, already
  * unit-aware) converts client-side from the same raw Celsius data
@@ -9,16 +12,24 @@ import { useCallback, useState } from 'react';
  * handler never re-fetches, just re-renders from lastCurrentData/
  * lastForecastData).
  *
- * Deliberately holds no persistence yet. v1's click handler wrote to
- * localStorage in the same function as the toggle; this phased build
- * splits that into Step 14 (ported storage.js wiring for unit +
- * theme together) rather than reproducing v1's single combined step.
+ * Persists via ported storage.js (Step 14): a lazy useState
+ * initializer reads `awr_unit` before first paint (so there's no
+ * flash of the wrong unit), and every toggle writes the new value
+ * back — matching v1's unitToggle click handler, which called
+ * setItem(UNIT_KEY, currentUnit) in the same function as the state
+ * flip. getItem's built-in fallback (see storage.js/Step 4) means a
+ * blocked or empty localStorage silently defaults to 'C', same as a
+ * fresh v1 install.
  */
 export function useUnit() {
-  const [unit, setUnit] = useState('C');
+  const [unit, setUnit] = useState(() => getItem(UNIT_KEY, 'C'));
 
   const toggleUnit = useCallback(() => {
-    setUnit((current) => (current === 'C' ? 'F' : 'C'));
+    setUnit((current) => {
+      const next = current === 'C' ? 'F' : 'C';
+      setItem(UNIT_KEY, next);
+      return next;
+    });
   }, []);
 
   return { unit, toggleUnit };

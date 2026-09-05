@@ -8,4 +8,9 @@ import '@testing-library/jest-dom/vitest';
 // next within the same file. Register it explicitly instead.
 afterEach(() => {
   cleanup();
+  // jsdom's localStorage persists across tests within the same file
+  // (and across files in the same worker) unless cleared explicitly.
+  // Needed starting Step 14 (useUnit/useTheme persistence) and every
+  // storage-backed hook after it (e.g. Step 15's useRecentSearches).
+  localStorage.clear();
 });
