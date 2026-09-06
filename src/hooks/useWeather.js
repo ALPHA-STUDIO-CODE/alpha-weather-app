@@ -1,6 +1,6 @@
-import { useCallback, useState } from 'react';
-import { fetchCurrentWeather, fetchForecast } from '../apiClient.js';
-import { groupByDay, dailySummary } from '../lib/forecast.js';
+import { useCallback, useState } from "react";
+import { fetchCurrentWeather, fetchForecast } from "../apiClient.js";
+import { groupByDay, dailySummary } from "../lib/forecast.js";
 
 const MAX_FORECAST_DAYS = 5;
 
@@ -23,6 +23,12 @@ const MAX_FORECAST_DAYS = 5;
  * `data`/`forecast` are only ever replaced by a *successful* fetch;
  * `error` is cleared on success and set on failure, independent of
  * either.
+ *
+ * search() resolves with the raw current-weather object on success,
+ * or undefined on failure — added in Step 16 so App.jsx can build a
+ * recent-search entry (name/sys.country/coord.lat/lon) right after a
+ * successful search, without reading potentially-stale `data` from
+ * this hook's own closure on the same tick the promise resolves.
  */
 export function useWeather() {
   const [data, setData] = useState(null);
@@ -47,6 +53,7 @@ export function useWeather() {
       setData(current);
       setForecast(summaries);
       setError(null);
+      return current;
     } catch (err) {
       // Deliberately not touching `data`/`forecast` here — see the
       // §5.4 note above. The typed WeatherApiError (or whatever was

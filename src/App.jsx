@@ -1,18 +1,42 @@
-import SearchForm from './components/SearchForm.jsx';
-import CurrentWeatherCard from './components/CurrentWeatherCard.jsx';
-import ForecastCards from './components/ForecastCards.jsx';
-import LoadingSpinner from './components/LoadingSpinner.jsx';
-import ErrorMessage from './components/ErrorMessage.jsx';
-import UnitToggle from './components/UnitToggle.jsx';
-import ThemeToggle from './components/ThemeToggle.jsx';
-import { useWeather } from './hooks/useWeather.js';
-import { useUnit } from './hooks/useUnit.js';
-import { useTheme } from './hooks/useTheme.js';
+import { useCallback } from "react";
+import SearchForm from "./components/SearchForm.jsx";
+import CurrentWeatherCard from "./components/CurrentWeatherCard.jsx";
+import ForecastCards from "./components/ForecastCards.jsx";
+import LoadingSpinner from "./components/LoadingSpinner.jsx";
+import ErrorMessage from "./components/ErrorMessage.jsx";
+import UnitToggle from "./components/UnitToggle.jsx";
+import ThemeToggle from "./components/ThemeToggle.jsx";
+import RecentSearchChips from "./components/RecentSearchChips.jsx";
+import { useWeather } from "./hooks/useWeather.js";
+import { useUnit } from "./hooks/useUnit.js";
+import { useTheme } from "./hooks/useTheme.js";
+import { useRecentSearches } from "./hooks/useRecentSearches.js";
 
 function App() {
   const { data, forecast, loading, error, search } = useWeather();
   const { unit, toggleUnit } = useUnit();
   const { theme, toggleTheme } = useTheme();
+  const { recents, record } = useRecentSearches();
+
+  // Ports v1's runSearch: after a successful search, build a recent-
+  // search entry from the resolved current-weather response (same
+  // fields v1 pulled — name, sys.country, coord.lat/lon) and record
+  // it. A failed search (search() resolves undefined) records
+  // nothing, same as v1's `if (lastCurrentData)` guard.
+  const handleSearch = useCallback(
+    async (location) => {
+      const current = await search(location);
+      if (current) {
+        record({
+          name: current.name,
+          country: current.sys?.country ?? "",
+          lat: current.coord?.lat,
+          lon: current.coord?.lon,
+        });
+      }
+    },
+    [search, record],
+  );
 
   return (
     <div id="app">
@@ -25,7 +49,8 @@ function App() {
       </header>
       <main className="main">
         <section className="search-section" aria-label="City search">
-          <SearchForm onSearch={search} />
+          <SearchForm onSearch={handleSearch} />
+          <RecentSearchChips recents={recents} onSelect={handleSearch} />
           <ErrorMessage error={error} />
         </section>
         <LoadingSpinner loading={loading} />
