@@ -62,9 +62,10 @@ describe("App — unit toggle integration (Step 12)", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.type(screen.getByRole("textbox"), "Abuja");
-    await user.click(screen.getByRole("button", { name: /^search$/i }));
-
+    // Step 17's smart initial load fires the first search
+    // automatically on mount (defaults to Abuja) — this test is
+    // about the unit toggle, not the search flow, so there's no
+    // need to drive the form as well.
     await waitFor(() => expect(screen.getByText("30°C")).toBeInTheDocument());
     expect(screen.getByText("30°C / 20°C")).toBeInTheDocument();
     expect(screen.getByText("3.2 m/s")).toBeInTheDocument();
@@ -113,22 +114,24 @@ describe("App — recent searches integration (Step 16)", () => {
     fetchForecast.mockResolvedValue(ONE_DAY_FORECAST_FIXTURE);
   });
 
-  it("records a chip after a successful search, keeps prior chips, and clicking a chip re-searches that city", async () => {
+  it("records a chip after a successful search (including the Step 17 initial auto-load), keeps prior chips, and clicking a chip re-searches that city", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    const input = screen.getByRole("textbox");
-    const searchButton = screen.getByRole("button", { name: /^search$/i });
-
-    await user.type(input, "Abuja");
-    await user.click(searchButton);
+    // Step 17's smart initial load fires handleSearch('Abuja')
+    // automatically on mount through this exact same shared entry
+    // point — wait for it to settle and produce the first chip
+    // before doing anything else, rather than searching it again by
+    // hand.
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: "Abuja, NG" }),
       ).toBeInTheDocument(),
     );
 
-    await user.clear(input);
+    const input = screen.getByRole("textbox");
+    const searchButton = screen.getByRole("button", { name: /^search$/i });
+
     await user.type(input, "London");
     await user.click(searchButton);
     await waitFor(() =>
@@ -150,5 +153,58 @@ describe("App — recent searches integration (Step 16)", () => {
     // Clicking the chip re-searched and the display updated back to
     // that city's weather.
     await waitFor(() => expect(screen.getByText("30°C")).toBeInTheDocument());
+  });
+});
+
+describe("App — smart initial load (Step 17)", () => {
+  beforeEach(() => {
+    fetchCurrentWeather.mockReset();
+    fetchForecast.mockReset();
+    fetchForecast.mockResolvedValue(ONE_DAY_FORECAST_FIXTURE);
+  });
+
+  it("defaults to Abuja on mount when awr_last_city is absent", async () => {
+    fetchCurrentWeather.mockResolvedValue(ABUJA_FIXTURE);
+    render(<App />);
+
+    await waitFor(() =>
+      expect(fetchCurrentWeather).toHaveBeenCalledWith("Abuja"),
+    );
+  });
+
+  it("reads a pre-existing awr_last_city and searches that city on mount instead of the default", async () => {
+    // setItem stores plain strings as-is (no JSON encoding) — see
+    // storage.js — so the raw value here matches what a real toggle/
+    // search flow would have written.
+    localStorage.setItem("awr_last_city", "London");
+    fetchCurrentWeather.mockImplementation((location) =>
+      Promise.resolve(FIXTURES_BY_CITY[location] ?? ABUJA_FIXTURE),
+    );
+    render(<App />);
+
+    await waitFor(() =>
+      expect(fetchCurrentWeather).toHaveBeenCalledWith("London"),
+    );
+    expect(fetchCurrentWeather).not.toHaveBeenCalledWith("Abuja");
+  });
+
+  it("persists awr_last_city after every successful search, through the same handleSearch used everywhere else", async () => {
+    const user = userEvent.setup();
+    fetchCurrentWeather.mockImplementation((location) =>
+      Promise.resolve(FIXTURES_BY_CITY[location] ?? ABUJA_FIXTURE),
+    );
+    render(<App />);
+
+    // Let the initial (default Abuja) load settle and persist first.
+    await waitFor(() =>
+      expect(localStorage.getItem("awr_last_city")).toBe("Abuja"),
+    );
+
+    await user.type(screen.getByRole("textbox"), "London");
+    await user.click(screen.getByRole("button", { name: /^search$/i }));
+
+    await waitFor(() =>
+      expect(localStorage.getItem("awr_last_city")).toBe("London"),
+    );
   });
 });

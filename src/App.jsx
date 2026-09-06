@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import SearchForm from "./components/SearchForm.jsx";
 import CurrentWeatherCard from "./components/CurrentWeatherCard.jsx";
 import ForecastCards from "./components/ForecastCards.jsx";
@@ -11,6 +11,10 @@ import { useWeather } from "./hooks/useWeather.js";
 import { useUnit } from "./hooks/useUnit.js";
 import { useTheme } from "./hooks/useTheme.js";
 import { useRecentSearches } from "./hooks/useRecentSearches.js";
+import { getItem, setItem } from "./lib/storage.js";
+
+const LAST_CITY_KEY = "awr_last_city";
+const DEFAULT_CITY = "Abuja";
 
 function App() {
   const { data, forecast, loading, error, search } = useWeather();
@@ -20,9 +24,12 @@ function App() {
 
   // Ports v1's runSearch: after a successful search, build a recent-
   // search entry from the resolved current-weather response (same
-  // fields v1 pulled — name, sys.country, coord.lat/lon) and record
-  // it. A failed search (search() resolves undefined) records
-  // nothing, same as v1's `if (lastCurrentData)` guard.
+  // fields v1 pulled — name, sys.country, coord.lat/lon), record it,
+  // and remember the city as `awr_last_city` for next visit's smart
+  // initial load (Step 17). A failed search (search() resolves
+  // undefined) does neither, same as v1's `if (lastCurrentData)`
+  // guard — both writes live in the same success block in v1, so
+  // they stay together here too.
   const handleSearch = useCallback(
     async (location) => {
       const current = await search(location);
@@ -33,10 +40,22 @@ function App() {
           lat: current.coord?.lat,
           lon: current.coord?.lon,
         });
+        setItem(LAST_CITY_KEY, current.name);
       }
     },
     [search, record],
   );
+
+  // Smart initial load (Step 17): on mount, read `awr_last_city`
+  // (defaulting to v1's DEFAULT_CITY, "Abuja", if absent) and run it
+  // through the *same* handleSearch used by SearchForm's submit and
+  // a chip's click — not a separate bespoke path. This is the
+  // "3 callers, 1 entry point" proof the plan's definition of done
+  // calls for.
+  useEffect(() => {
+    const initialCity = getItem(LAST_CITY_KEY, null) ?? DEFAULT_CITY;
+    handleSearch(initialCity);
+  }, [handleSearch]);
 
   return (
     <div id="app">
