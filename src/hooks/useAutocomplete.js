@@ -6,6 +6,15 @@ const MIN_CHARS = 2;
 const DEBOUNCE_MS = 300;
 const MAX_SUGGESTIONS = 5;
 
+// A stable, shared empty-array reference. Returning a fresh `[]`
+// literal from this hook on every render (for the "below MIN_CHARS"
+// case) would give consumers a new array identity every single
+// render, breaking any downstream `suggestions !== previous` check
+// (e.g. SearchForm resetting highlightedIndex when the list changes)
+// — that comparison would always be true, causing an infinite
+// render loop. One shared reference fixes it.
+const EMPTY_SUGGESTIONS = [];
+
 /**
  * Fetches up to 5 city-geocode suggestions for `query`, debounced by
  * the already-ported debounce.js (Step 4) — not reimplemented here.
@@ -59,5 +68,5 @@ export function useAutocomplete(query) {
   // debounce, same as v1's early return before
   // debouncedFetchSuggestions is ever called.
   const trimmedQuery = query.trim();
-  return trimmedQuery.length < MIN_CHARS ? [] : suggestions;
+  return trimmedQuery.length < MIN_CHARS ? EMPTY_SUGGESTIONS : suggestions;
 }
