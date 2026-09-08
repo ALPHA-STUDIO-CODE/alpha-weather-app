@@ -45,3 +45,21 @@
   text-transform: capitalize;
   margin: var(--space-1) 0 0;
 }
+
+@media (min-width: 768px) {
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+  .card {
+    flex: unset;
+    scroll-snap-align: none;
+  }
+}
+@media (min-width: 1200px) {
+  .cards {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}

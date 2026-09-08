@@ -1,5 +1,25 @@
+.form {
+  display: flex;
+  gap: var(--space-2);
+}
 .field {
   position: relative;
+  flex: 1;
+}
+.input {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+.input:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 1px;
 }
 .button {
   min-height: 44px;

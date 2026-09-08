@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import styles from './SearchForm.module.css';
-import Autocomplete from './Autocomplete.jsx';
-import { useAutocomplete } from '../hooks/useAutocomplete.js';
+import { useEffect, useRef, useState } from "react";
+import styles from "./SearchForm.module.css";
+import Autocomplete from "./Autocomplete.jsx";
+import { useAutocomplete } from "../hooks/useAutocomplete.js";
 
 /**
  * Search form for looking up a city's weather, plus its geocode
@@ -26,7 +26,7 @@ import { useAutocomplete } from '../hooks/useAutocomplete.js';
  *   which is exactly the typed-search behavior we still want.
  */
 function SearchForm({ onSearch }) {
-  const [city, setCity] = useState('');
+  const [city, setCity] = useState("");
   const [dismissed, setDismissed] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const suggestions = useAutocomplete(city);
@@ -53,8 +53,8 @@ function SearchForm({ onSearch }) {
         setDismissed(true);
       }
     }
-    document.addEventListener('click', handleDocumentClick);
-    return () => document.removeEventListener('click', handleDocumentClick);
+    document.addEventListener("click", handleDocumentClick);
+    return () => document.removeEventListener("click", handleDocumentClick);
   }, []);
 
   const isDropdownOpen = !dismissed && suggestions.length > 0;
@@ -73,23 +73,23 @@ function SearchForm({ onSearch }) {
   function handleKeyDown(event) {
     if (!isDropdownOpen) return;
     switch (event.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
         event.preventDefault();
         setHighlightedIndex((index) => (index + 1) % suggestions.length);
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         event.preventDefault();
         setHighlightedIndex(
           (index) => (index - 1 + suggestions.length) % suggestions.length,
         );
         break;
-      case 'Enter':
+      case "Enter":
         if (highlightedIndex >= 0) {
           event.preventDefault();
           selectSuggestion(suggestions[highlightedIndex]);
         }
         break;
-      case 'Escape':
+      case "Escape":
         setDismissed(true);
         break;
       default:
@@ -106,7 +106,7 @@ function SearchForm({ onSearch }) {
 
   return (
     <form
-      className="search-form"
+      className={`search-form ${styles.form}`}
       autoComplete="off"
       onSubmit={handleSubmit}
     >
@@ -119,7 +119,7 @@ function SearchForm({ onSearch }) {
           type="text"
           name="city"
           placeholder="Search for a city…"
-          className="search-form__input"
+          className={`search-form__input ${styles.input}`}
           value={city}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
