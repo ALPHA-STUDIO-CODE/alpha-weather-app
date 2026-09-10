@@ -1,5 +1,56 @@
-import styles from './SunriseSunset.module.css';
-import { formatSunrise, formatSunset } from '../lib/sunTimes.js';
+import styles from "./SunriseSunset.module.css";
+import { formatSunrise, formatSunset } from "../lib/sunTimes.js";
+
+/**
+ * Small original geometric icons (horizon line + sun arc + a
+ * directional arrow) rather than an icon-library dependency pulled
+ * in for just two icons, or emoji glyphs (inconsistent rendering
+ * across platforms/fonts). `currentColor` means each inherits
+ * whatever text color its CSS Module rule sets — no separate
+ * light/dark-mode icon color logic needed, it rides on the same
+ * theme variables everything else already uses.
+ */
+function SunriseIcon(props) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <line x1="2" y1="19" x2="22" y2="19" />
+      <path d="M7 19a5 5 0 0 1 10 0" />
+      <polyline points="9 8 12 5 15 8" />
+      <line x1="12" y1="5" x2="12" y2="11" />
+    </svg>
+  );
+}
+
+function SunsetIcon(props) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <line x1="2" y1="19" x2="22" y2="19" />
+      <path d="M7 19a5 5 0 0 1 10 0" />
+      <polyline points="9 11 12 14 15 11" />
+      <line x1="12" y1="8" x2="12" y2="14" />
+    </svg>
+  );
+}
 
 /**
  * First entirely new v2 feature (spec §4.2). No new API call — reads
@@ -28,16 +79,12 @@ function SunriseSunset({ data }) {
   return (
     <div className={styles.container} aria-label="Sunrise and sunset">
       <div className={styles.row}>
-        <span className={styles.icon} aria-hidden="true">
-          🌅
-        </span>
+        <SunriseIcon className={styles.icon} />
         <span className={styles.label}>Sunrise</span>
         <span className={styles.value}>{sunrise}</span>
       </div>
       <div className={styles.row}>
-        <span className={styles.icon} aria-hidden="true">
-          🌇
-        </span>
+        <SunsetIcon className={styles.icon} />
         <span className={styles.label}>Sunset</span>
         <span className={styles.value}>{sunset}</span>
       </div>
