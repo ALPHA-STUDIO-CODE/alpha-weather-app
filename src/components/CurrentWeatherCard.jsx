@@ -1,6 +1,7 @@
 import styles from './CurrentWeatherCard.module.css';
 import { formatLocalTime } from '../lib/time.js';
 import { formatTemp } from '../lib/units.js';
+import SunriseSunset from './SunriseSunset.jsx';
 
 /**
  * Renders current-conditions fields from a raw OpenWeather "current
@@ -54,6 +55,7 @@ function CurrentWeatherCard({ data, unit = 'C' }) {
           <dd>{data.wind.speed} m/s</dd>
         </div>
       </dl>
+      <SunriseSunset data={data} />
     </section>
   );
 }
