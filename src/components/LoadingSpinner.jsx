@@ -1,4 +1,4 @@
-import styles from './LoadingSpinner.module.css';
+import styles from "./LoadingSpinner.module.css";
 
 /**
  * Visible only while a search is in flight. Driven by useWeather's

@@ -1,11 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import {
-  fetchCurrentWeather,
-  fetchForecast,
-  geocode,
-  WeatherApiError,
-} from "./apiClient.js";
+import { fetchCurrentWeather, fetchForecast, geocode, WeatherApiError } from "./apiClient.js";
 function mockFetch(status, body) {
   return async () => ({
     ok: status >= 200 && status < 300,
@@ -114,9 +109,7 @@ test("fetchForecast hits the forecast endpoint, not current", async () => {
   assert.ok(capturedUrl.startsWith("/api/weather?type=forecast"));
 });
 test("geocode returns parsed JSON on success", async () => {
-  globalThis.fetch = mockFetch(200, [
-    { name: "London", country: "GB", lat: 51.51, lon: -0.13 },
-  ]);
+  globalThis.fetch = mockFetch(200, [{ name: "London", country: "GB", lat: 51.51, lon: -0.13 }]);
   const result = await geocode("Lon");
   assert.equal(result.length, 1);
   assert.equal(result[0].name, "London");

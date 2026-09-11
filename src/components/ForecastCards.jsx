@@ -1,5 +1,5 @@
-import styles from './ForecastCards.module.css';
-import { formatTemp } from '../lib/units.js';
+import styles from "./ForecastCards.module.css";
+import { formatTemp } from "../lib/units.js";
 
 /**
  * formatDayLabel is kept local to this component rather than in
@@ -9,9 +9,9 @@ import { formatTemp } from '../lib/units.js';
  * formatLocalTime.
  */
 function formatDayLabel(dateStr) {
-  return new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    timeZone: 'UTC',
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    timeZone: "UTC",
   }).format(new Date(dateStr));
 }
 
@@ -27,7 +27,7 @@ function formatDayLabel(dateStr) {
  * Renders nothing until a successful search has produced a forecast
  * (mirrors v1's `forecastSection.hidden` starting true).
  */
-function ForecastCards({ forecast, unit = 'C' }) {
+function ForecastCards({ forecast, unit = "C" }) {
   if (!forecast || forecast.length === 0) return null;
 
   return (

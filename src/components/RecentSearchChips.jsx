@@ -1,4 +1,4 @@
-import styles from './RecentSearchChips.module.css';
+import styles from "./RecentSearchChips.module.css";
 
 /**
  * Renders one chip per recent-search entry ("City, Country"),

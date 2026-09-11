@@ -1,6 +1,6 @@
-import { afterEach } from 'vitest';
-import { cleanup } from '@testing-library/react';
-import '@testing-library/jest-dom/vitest';
+import { afterEach } from "vitest";
+import { cleanup } from "@testing-library/react";
+import "@testing-library/jest-dom/vitest";
 
 // With `globals: false` in vite.config.js, RTL's automatic afterEach
 // cleanup never gets registered (it hooks into a global afterEach

@@ -73,18 +73,16 @@ describe("App — unit toggle integration (Step 12)", () => {
     const fetchCallsBeforeToggle =
       fetchCurrentWeather.mock.calls.length + fetchForecast.mock.calls.length;
 
-    await user.click(
-      screen.getByRole("button", { name: "Switch to Fahrenheit" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Switch to Fahrenheit" }));
 
     expect(screen.getByText("86°F")).toBeInTheDocument();
     expect(screen.getByText("86°F / 68°F")).toBeInTheDocument();
     // Wind speed is not unit-aware — stays m/s regardless of toggle.
     expect(screen.getByText("3.2 m/s")).toBeInTheDocument();
 
-    expect(
-      fetchCurrentWeather.mock.calls.length + fetchForecast.mock.calls.length,
-    ).toBe(fetchCallsBeforeToggle);
+    expect(fetchCurrentWeather.mock.calls.length + fetchForecast.mock.calls.length).toBe(
+      fetchCallsBeforeToggle,
+    );
   });
 });
 
@@ -124,9 +122,7 @@ describe("App — recent searches integration (Step 16)", () => {
     // before doing anything else, rather than searching it again by
     // hand.
     await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: "Abuja, NG" }),
-      ).toBeInTheDocument(),
+      expect(screen.getByRole("button", { name: "Abuja, NG" })).toBeInTheDocument(),
     );
 
     const input = screen.getByRole("textbox");
@@ -135,21 +131,15 @@ describe("App — recent searches integration (Step 16)", () => {
     await user.type(input, "London");
     await user.click(searchButton);
     await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: "London, GB" }),
-      ).toBeInTheDocument(),
+      expect(screen.getByRole("button", { name: "London, GB" })).toBeInTheDocument(),
     );
     // Prior chip is still there — recording adds, doesn't replace.
-    expect(
-      screen.getByRole("button", { name: "Abuja, NG" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Abuja, NG" })).toBeInTheDocument();
 
     fetchCurrentWeather.mockClear();
     await user.click(screen.getByRole("button", { name: "Abuja, NG" }));
 
-    await waitFor(() =>
-      expect(fetchCurrentWeather).toHaveBeenCalledWith("Abuja"),
-    );
+    await waitFor(() => expect(fetchCurrentWeather).toHaveBeenCalledWith("Abuja"));
     // Clicking the chip re-searched and the display updated back to
     // that city's weather.
     await waitFor(() => expect(screen.getByText("30°C")).toBeInTheDocument());
@@ -167,9 +157,7 @@ describe("App — smart initial load (Step 17)", () => {
     fetchCurrentWeather.mockResolvedValue(ABUJA_FIXTURE);
     render(<App />);
 
-    await waitFor(() =>
-      expect(fetchCurrentWeather).toHaveBeenCalledWith("Abuja"),
-    );
+    await waitFor(() => expect(fetchCurrentWeather).toHaveBeenCalledWith("Abuja"));
   });
 
   it("reads a pre-existing awr_last_city and searches that city on mount instead of the default", async () => {
@@ -182,9 +170,7 @@ describe("App — smart initial load (Step 17)", () => {
     );
     render(<App />);
 
-    await waitFor(() =>
-      expect(fetchCurrentWeather).toHaveBeenCalledWith("London"),
-    );
+    await waitFor(() => expect(fetchCurrentWeather).toHaveBeenCalledWith("London"));
     expect(fetchCurrentWeather).not.toHaveBeenCalledWith("Abuja");
   });
 
@@ -196,15 +182,11 @@ describe("App — smart initial load (Step 17)", () => {
     render(<App />);
 
     // Let the initial (default Abuja) load settle and persist first.
-    await waitFor(() =>
-      expect(localStorage.getItem("awr_last_city")).toBe("Abuja"),
-    );
+    await waitFor(() => expect(localStorage.getItem("awr_last_city")).toBe("Abuja"));
 
     await user.type(screen.getByRole("textbox"), "London");
     await user.click(screen.getByRole("button", { name: /^search$/i }));
 
-    await waitFor(() =>
-      expect(localStorage.getItem("awr_last_city")).toBe("London"),
-    );
+    await waitFor(() => expect(localStorage.getItem("awr_last_city")).toBe("London"));
   });
 });

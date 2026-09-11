@@ -1,5 +1,5 @@
-import styles from './ErrorMessage.module.css';
-import { getErrorMessage } from '../lib/errors.js';
+import styles from "./ErrorMessage.module.css";
+import { getErrorMessage } from "../lib/errors.js";
 
 /**
  * Renders useWeather's `error` state as inline copy via the ported

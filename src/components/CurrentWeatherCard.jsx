@@ -1,7 +1,7 @@
-import styles from './CurrentWeatherCard.module.css';
-import { formatLocalTime } from '../lib/time.js';
-import { formatTemp } from '../lib/units.js';
-import SunriseSunset from './SunriseSunset.jsx';
+import styles from "./CurrentWeatherCard.module.css";
+import { formatLocalTime } from "../lib/time.js";
+import { formatTemp } from "../lib/units.js";
+import SunriseSunset from "./SunriseSunset.jsx";
 
 /**
  * Renders current-conditions fields from a raw OpenWeather "current
@@ -17,13 +17,13 @@ import SunriseSunset from './SunriseSunset.jsx';
  * speed is displayed in m/s regardless of `unit`, per v1 §4.5 — only
  * temperature is unit-aware.
  */
-function CurrentWeatherCard({ data, unit = 'C' }) {
+function CurrentWeatherCard({ data, unit = "C" }) {
   if (!data) return null;
 
-  const country = data.sys?.country ? `, ${data.sys.country}` : '';
+  const country = data.sys?.country ? `, ${data.sys.country}` : "";
   const localTime = formatLocalTime(data.dt, data.timezone ?? 0);
   const icon = data.weather?.[0]?.icon;
-  const condition = data.weather?.[0]?.description ?? '';
+  const condition = data.weather?.[0]?.description ?? "";
 
   return (
     <section className={styles.card} aria-label="Current weather">

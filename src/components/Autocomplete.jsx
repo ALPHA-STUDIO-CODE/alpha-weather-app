@@ -1,4 +1,4 @@
-import styles from './Autocomplete.module.css';
+import styles from "./Autocomplete.module.css";
 
 /**
  * Presentational dropdown for geocode suggestions — ported from v1's
@@ -21,9 +21,7 @@ function Autocomplete({ suggestions, highlightedIndex, onHover, onSelect }) {
           role="option"
           aria-selected={index === highlightedIndex}
           className={
-            index === highlightedIndex
-              ? `${styles.item} ${styles.highlighted}`
-              : styles.item
+            index === highlightedIndex ? `${styles.item} ${styles.highlighted}` : styles.item
           }
           onMouseEnter={() => onHover(index)}
           onClick={() => onSelect(suggestion)}

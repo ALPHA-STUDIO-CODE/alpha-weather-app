@@ -73,12 +73,7 @@ function App() {
           <ErrorMessage error={error} />
         </section>
         <LoadingSpinner loading={loading} />
-        <CurrentWeatherCard
-          data={data}
-          loading={loading}
-          error={error}
-          unit={unit}
-        />
+        <CurrentWeatherCard data={data} loading={loading} error={error} unit={unit} />
         <ForecastCards forecast={forecast} unit={unit} />
       </main>
     </div>

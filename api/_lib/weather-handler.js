@@ -27,11 +27,7 @@ export async function handleWeatherRequest(
       return { status: 404, body: { error: "city not found" } };
     }
     if (!response.ok) {
-      console.error(
-        "OpenWeather returned non-OK status:",
-        response.status,
-        data,
-      );
+      console.error("OpenWeather returned non-OK status:", response.status, data);
       return {
         status: 502,
         body: { error: "upstream weather service failed" },

@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
-import { getItem, setItem } from '../lib/storage.js';
+import { useCallback, useEffect, useState } from "react";
+import { getItem, setItem } from "../lib/storage.js";
 
-const THEME_KEY = 'awr_theme';
+const THEME_KEY = "awr_theme";
 
 /**
  * Holds theme state ('light' | 'dark') and a toggleTheme() to flip
@@ -29,15 +29,15 @@ const THEME_KEY = 'awr_theme';
  * isn't a surprise later.
  */
 export function useTheme() {
-  const [theme, setTheme] = useState(() => getItem(THEME_KEY, 'light'));
+  const [theme, setTheme] = useState(() => getItem(THEME_KEY, "light"));
 
   useEffect(() => {
-    document.body.classList.toggle('dark-mode', theme === 'dark');
+    document.body.classList.toggle("dark-mode", theme === "dark");
   }, [theme]);
 
   const toggleTheme = useCallback(() => {
     setTheme((current) => {
-      const next = current === 'light' ? 'dark' : 'light';
+      const next = current === "light" ? "dark" : "light";
       setItem(THEME_KEY, next);
       return next;
     });

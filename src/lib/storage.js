@@ -21,9 +21,7 @@ export function setItem(key, value) {
     if (typeof localStorage === "undefined" || !localStorage) {
       return;
     }
-    const serialized =
-      typeof value === "string" ? value : JSON.stringify(value);
+    const serialized = typeof value === "string" ? value : JSON.stringify(value);
     localStorage.setItem(key, serialized);
-  } catch {
-  }
+  } catch {}
 }

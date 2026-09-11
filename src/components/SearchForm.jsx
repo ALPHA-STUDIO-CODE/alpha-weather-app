@@ -79,9 +79,7 @@ function SearchForm({ onSearch }) {
         break;
       case "ArrowUp":
         event.preventDefault();
-        setHighlightedIndex(
-          (index) => (index - 1 + suggestions.length) % suggestions.length,
-        );
+        setHighlightedIndex((index) => (index - 1 + suggestions.length) % suggestions.length);
         break;
       case "Enter":
         if (highlightedIndex >= 0) {
@@ -105,11 +103,7 @@ function SearchForm({ onSearch }) {
   }
 
   return (
-    <form
-      className={`search-form ${styles.form}`}
-      autoComplete="off"
-      onSubmit={handleSubmit}
-    >
+    <form className={`search-form ${styles.form}`} autoComplete="off" onSubmit={handleSubmit}>
       <div className={`search-form__field ${styles.field}`} ref={fieldRef}>
         <label htmlFor="search-input" className="visually-hidden">
           Search for a city
@@ -124,9 +118,7 @@ function SearchForm({ onSearch }) {
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           aria-activedescendant={
-            isDropdownOpen && highlightedIndex >= 0
-              ? `suggestion-${highlightedIndex}`
-              : undefined
+            isDropdownOpen && highlightedIndex >= 0 ? `suggestion-${highlightedIndex}` : undefined
           }
         />
         {isDropdownOpen && (

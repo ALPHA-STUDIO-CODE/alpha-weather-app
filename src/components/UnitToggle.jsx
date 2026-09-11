@@ -1,4 +1,4 @@
-import styles from './ToggleButton.module.css';
+import styles from "./ToggleButton.module.css";
 
 /**
  * Pill button toggling between °C and °F. The visible label,
@@ -8,17 +8,17 @@ import styles from './ToggleButton.module.css';
  * active, and aria-label describes the action the click performs.
  */
 function UnitToggle({ unit, onToggle }) {
-  const isFahrenheit = unit === 'F';
+  const isFahrenheit = unit === "F";
 
   return (
     <button
       type="button"
       className={styles.pill}
       aria-pressed={isFahrenheit}
-      aria-label={isFahrenheit ? 'Switch to Celsius' : 'Switch to Fahrenheit'}
+      aria-label={isFahrenheit ? "Switch to Celsius" : "Switch to Fahrenheit"}
       onClick={onToggle}
     >
-      <span aria-hidden="true">{isFahrenheit ? '°F' : '°C'}</span>
+      <span aria-hidden="true">{isFahrenheit ? "°F" : "°C"}</span>
     </button>
   );
 }

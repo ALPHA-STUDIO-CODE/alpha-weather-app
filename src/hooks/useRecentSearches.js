@@ -1,8 +1,8 @@
-import { useCallback, useState } from 'react';
-import { getItem, setItem } from '../lib/storage.js';
-import { addSearch } from '../lib/recentSearches.js';
+import { useCallback, useState } from "react";
+import { getItem, setItem } from "../lib/storage.js";
+import { addSearch } from "../lib/recentSearches.js";
 
-const RECENT_KEY = 'awr_recent_searches';
+const RECENT_KEY = "awr_recent_searches";
 
 /**
  * Holds the recent-searches list — most-recent-first, capped at 5,

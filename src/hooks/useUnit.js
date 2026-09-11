@@ -1,7 +1,7 @@
-import { useCallback, useState } from 'react';
-import { getItem, setItem } from '../lib/storage.js';
+import { useCallback, useState } from "react";
+import { getItem, setItem } from "../lib/storage.js";
 
-const UNIT_KEY = 'awr_unit';
+const UNIT_KEY = "awr_unit";
 
 /**
  * Holds unit state ('C' | 'F') and a toggleUnit() to flip it.
@@ -22,11 +22,11 @@ const UNIT_KEY = 'awr_unit';
  * fresh v1 install.
  */
 export function useUnit() {
-  const [unit, setUnit] = useState(() => getItem(UNIT_KEY, 'C'));
+  const [unit, setUnit] = useState(() => getItem(UNIT_KEY, "C"));
 
   const toggleUnit = useCallback(() => {
     setUnit((current) => {
-      const next = current === 'C' ? 'F' : 'C';
+      const next = current === "C" ? "F" : "C";
       setItem(UNIT_KEY, next);
       return next;
     });

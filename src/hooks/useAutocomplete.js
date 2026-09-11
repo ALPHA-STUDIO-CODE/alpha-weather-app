@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { geocode } from '../apiClient.js';
-import { debounce } from '../lib/debounce.js';
+import { useEffect, useRef, useState } from "react";
+import { geocode } from "../apiClient.js";
+import { debounce } from "../lib/debounce.js";
 
 const MIN_CHARS = 2;
 const DEBOUNCE_MS = 300;

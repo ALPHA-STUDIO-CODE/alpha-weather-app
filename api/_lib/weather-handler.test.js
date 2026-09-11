@@ -26,10 +26,7 @@ test("upstream 404 returns clean not-found shape", async () => {
   assert.deepEqual(result.body, { error: "city not found" });
 });
 test("upstream 500 returns clean generic error shape", async () => {
-  const result = await handleWeatherRequest(
-    { type: "current", city: "Abuja" },
-    mockFetch(500, {}),
-  );
+  const result = await handleWeatherRequest({ type: "current", city: "Abuja" }, mockFetch(500, {}));
   assert.equal(result.status, 502);
   assert.deepEqual(result.body, { error: "upstream weather service failed" });
 });
@@ -37,10 +34,7 @@ test("fetch throwing (network failure/timeout) returns clean generic error shape
   const throwingFetch = async () => {
     throw new Error("network timeout");
   };
-  const result = await handleWeatherRequest(
-    { type: "current", city: "Abuja" },
-    throwingFetch,
-  );
+  const result = await handleWeatherRequest({ type: "current", city: "Abuja" }, throwingFetch);
   assert.equal(result.status, 502);
   assert.deepEqual(result.body, { error: "upstream weather service failed" });
 });

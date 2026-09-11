@@ -11,10 +11,7 @@ const SUNRISE_UTC = 1704090600; // 2024-01-01T06:30:00Z
 const SUNSET_UTC = 1704127500; // 2024-01-01T16:45:00Z
 
 test("formatSunrise delegates to formatLocalTime (same result for the same inputs)", () => {
-  assert.equal(
-    formatSunrise(SUNRISE_UTC, 0),
-    formatLocalTime(SUNRISE_UTC, 0),
-  );
+  assert.equal(formatSunrise(SUNRISE_UTC, 0), formatLocalTime(SUNRISE_UTC, 0));
 });
 
 test("formatSunset delegates to formatLocalTime (same result for the same inputs)", () => {

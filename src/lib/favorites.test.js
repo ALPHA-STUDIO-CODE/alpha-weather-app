@@ -72,8 +72,5 @@ test("isFavorite returns false when the city is not in the list", () => {
 });
 
 test("isFavorite lookup is case-insensitive on name+country", () => {
-  assert.equal(
-    isFavorite([ABUJA], { name: "ABUJA", country: "ng" }),
-    true,
-  );
+  assert.equal(isFavorite([ABUJA], { name: "ABUJA", country: "ng" }), true);
 });

@@ -60,9 +60,7 @@ test("groupByDay + dailySummary together produce 5 or fewer day summaries from a
     entry(start + i * 10800, 15 + (i % 5), "x", "cond"),
   );
   const groups = groupByDay(entries40, 0);
-  const summaries = Object.values(groups).map((dayEntries) =>
-    dailySummary(dayEntries, 0),
-  );
+  const summaries = Object.values(groups).map((dayEntries) => dailySummary(dayEntries, 0));
   assert.ok(summaries.length <= 6);
   for (const s of summaries) {
     assert.ok(typeof s.min === "number");

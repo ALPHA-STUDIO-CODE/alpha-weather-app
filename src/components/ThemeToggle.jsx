@@ -1,4 +1,4 @@
-import styles from './ToggleButton.module.css';
+import styles from "./ToggleButton.module.css";
 
 /**
  * Pill button toggling light/dark mode. Icon, aria-pressed, and
@@ -8,17 +8,17 @@ import styles from './ToggleButton.module.css';
  * not the current state.
  */
 function ThemeToggle({ theme, onToggle }) {
-  const isDark = theme === 'dark';
+  const isDark = theme === "dark";
 
   return (
     <button
       type="button"
       className={styles.pill}
       aria-pressed={isDark}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onClick={onToggle}
     >
-      <span aria-hidden="true">{isDark ? '☀' : '☾'}</span>
+      <span aria-hidden="true">{isDark ? "☀" : "☾"}</span>
     </button>
   );
 }
