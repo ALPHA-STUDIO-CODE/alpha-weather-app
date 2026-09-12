@@ -24,7 +24,13 @@ const MAX_FAVORITES = 10;
  * full (10/10)" message via the existing ErrorMessage component.
  * `atCap` clears on the next toggle that isn't itself blocked by the
  * cap (unfavoriting always clears it, since that's precisely how a
- * user would make room).
+ * user would make room), and via `clearAtCap()` — exposed so App.jsx
+ * can dismiss the warning when a *search* succeeds, not just a star
+ * click. Without this, searching a new city (from the search bar, a
+ * favorites-row entry, or a recent chip — all three go through the
+ * same handleSearch in App.jsx) left a stale "Favorites full"
+ * message on screen indefinitely, since none of those actions ever
+ * call toggleFavorite at all.
  */
 export function useFavorites() {
   const [favorites, setFavorites] = useState(() => getItem(FAVORITES_KEY, []));
@@ -51,5 +57,9 @@ export function useFavorites() {
     });
   }, []);
 
-  return { favorites, toggleFavorite, isFavorited, atCap };
+  const clearAtCap = useCallback(() => {
+    setAtCap(false);
+  }, []);
+
+  return { favorites, toggleFavorite, isFavorited, atCap, clearAtCap };
 }

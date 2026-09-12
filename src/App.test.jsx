@@ -190,3 +190,73 @@ describe("App — smart initial load (Step 17)", () => {
     await waitFor(() => expect(localStorage.getItem("awr_last_city")).toBe("London"));
   });
 });
+
+describe("App — favorites-full warning clears on a new search (bugfix)", () => {
+  beforeEach(() => {
+    fetchCurrentWeather.mockReset();
+    fetchForecast.mockReset();
+    fetchForecast.mockResolvedValue(ONE_DAY_FORECAST_FIXTURE);
+    localStorage.clear();
+    // Pre-seed exactly 10 favorites, none of which are the cities
+    // searched below, so the very next favorite attempt hits the cap.
+    const tenFavorites = Array.from({ length: 10 }, (_, i) => ({
+      name: `City${i}`,
+      country: "XX",
+    }));
+    localStorage.setItem("awr_favorites", JSON.stringify(tenFavorites));
+  });
+
+  it('a stale "Favorites full" warning is dismissed by the next successful search, not just by a star click', async () => {
+    const OVERFLOW_FIXTURE = {
+      name: "Overflow",
+      sys: { country: "YY" },
+      main: { temp: 20, humidity: 50 },
+      weather: [{ description: "clear sky", icon: "01d" }],
+      wind: { speed: 1 },
+      dt: 1704110400,
+      timezone: 0,
+    };
+    const ELSEWHERE_FIXTURE = {
+      name: "Elsewhere",
+      sys: { country: "ZZ" },
+      main: { temp: 25, humidity: 40 },
+      weather: [{ description: "clear sky", icon: "01d" }],
+      wind: { speed: 2 },
+      dt: 1704110400,
+      timezone: 0,
+    };
+    fetchCurrentWeather.mockImplementation((location) => {
+      if (location === "Overflow") return Promise.resolve(OVERFLOW_FIXTURE);
+      if (location === "Elsewhere") return Promise.resolve(ELSEWHERE_FIXTURE);
+      return Promise.resolve(ABUJA_FIXTURE);
+    });
+
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Let the default initial-load search settle first.
+    await waitFor(() => expect(screen.getByText("30°C")).toBeInTheDocument());
+
+    await user.type(screen.getByRole("textbox"), "Overflow");
+    await user.click(screen.getByRole("button", { name: /^search$/i }));
+    await waitFor(() => expect(screen.getByText("20°C")).toBeInTheDocument());
+
+    // Already at the 10-item cap, and "Overflow" isn't one of the 10
+    // pre-seeded favorites — this attempt should be blocked.
+    await user.click(screen.getByRole("button", { name: "Add to favorites" }));
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Favorites full (10/10). Remove one to add another.",
+    );
+
+    // This is the actual bug: searching a new city (same path as the
+    // search bar, a favorites-row entry, or a recent chip — all three
+    // share handleSearch) should dismiss the stale warning, not just
+    // another star click.
+    await user.clear(screen.getByRole("textbox"));
+    await user.type(screen.getByRole("textbox"), "Elsewhere");
+    await user.click(screen.getByRole("button", { name: /^search$/i }));
+
+    await waitFor(() => expect(screen.getByText("25°C")).toBeInTheDocument());
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+});

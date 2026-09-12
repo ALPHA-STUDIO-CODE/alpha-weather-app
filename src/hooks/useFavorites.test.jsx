@@ -105,4 +105,26 @@ describe("useFavorites", () => {
     const second = renderHook(() => useFavorites());
     expect(second.result.current.favorites).toEqual([city("Abuja", "NG")]);
   });
+
+  it("clearAtCap dismisses the warning independent of toggleFavorite (the search-flow bugfix)", () => {
+    const { result } = renderHook(() => useFavorites());
+
+    for (let i = 0; i < 10; i += 1) {
+      act(() => {
+        result.current.toggleFavorite(city(`City${i}`));
+      });
+    }
+    act(() => {
+      result.current.toggleFavorite(city("Overflow"));
+    });
+    expect(result.current.atCap).toBe(true);
+
+    act(() => {
+      result.current.clearAtCap();
+    });
+
+    expect(result.current.atCap).toBe(false);
+    // Clearing the warning doesn't touch the favorites list itself.
+    expect(result.current.favorites).toHaveLength(10);
+  });
 });

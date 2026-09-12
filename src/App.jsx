@@ -23,7 +23,7 @@ function App() {
   const { unit, toggleUnit } = useUnit();
   const { theme, toggleTheme } = useTheme();
   const { recents, record } = useRecentSearches();
-  const { favorites, toggleFavorite, isFavorited, atCap } = useFavorites();
+  const { favorites, toggleFavorite, isFavorited, atCap, clearAtCap } = useFavorites();
 
   // Ports v1's runSearch: after a successful search, build a recent-
   // search entry from the resolved current-weather response (same
@@ -33,6 +33,13 @@ function App() {
   // undefined) does neither, same as v1's `if (lastCurrentData)`
   // guard — both writes live in the same success block in v1, so
   // they stay together here too.
+  //
+  // Also clears any stale `atCap` favorites warning here: search bar
+  // submit, a favorites-row click, and a recent chip click all funnel
+  // through this same function, so fixing it once here dismisses the
+  // "Favorites full" message on a new search regardless of which of
+  // the three triggered it — matching what a user actually expects
+  // ("I searched somewhere else, why is that old warning still up?").
   const handleSearch = useCallback(
     async (location) => {
       const current = await search(location);
@@ -44,9 +51,10 @@ function App() {
           lon: current.coord?.lon,
         });
         setItem(LAST_CITY_KEY, current.name);
+        clearAtCap();
       }
     },
-    [search, record],
+    [search, record, clearAtCap],
   );
 
   // Smart initial load (Step 17): on mount, read `awr_last_city`
