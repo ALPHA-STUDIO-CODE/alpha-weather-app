@@ -36,6 +36,13 @@ describe("ErrorMessage", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Something went wrong. Please try again.");
   });
 
+  it("renders a direct message override, bypassing the error.type lookup entirely", () => {
+    render(<ErrorMessage message="Favorites full (10/10). Remove one to add another." />);
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Favorites full (10/10). Remove one to add another.",
+    );
+  });
+
   it("renders alongside existing weather data — the display is never blanked on failure", () => {
     render(
       <>

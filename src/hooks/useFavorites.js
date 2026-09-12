@@ -1,8 +1,8 @@
-import { useCallback, useState } from 'react';
-import { getItem, setItem } from '../lib/storage.js';
-import { addFavorite, removeFavorite, isFavorite } from '../lib/favorites.js';
+import { useCallback, useState } from "react";
+import { getItem, setItem } from "../lib/storage.js";
+import { addFavorite, removeFavorite, isFavorite } from "../lib/favorites.js";
 
-const FAVORITES_KEY = 'awr_favorites';
+const FAVORITES_KEY = "awr_favorites";
 const MAX_FAVORITES = 10;
 
 /**
@@ -27,15 +27,10 @@ const MAX_FAVORITES = 10;
  * user would make room).
  */
 export function useFavorites() {
-  const [favorites, setFavorites] = useState(() =>
-    getItem(FAVORITES_KEY, []),
-  );
+  const [favorites, setFavorites] = useState(() => getItem(FAVORITES_KEY, []));
   const [atCap, setAtCap] = useState(false);
 
-  const isFavorited = useCallback(
-    (entry) => isFavorite(favorites, entry),
-    [favorites],
-  );
+  const isFavorited = useCallback((entry) => isFavorite(favorites, entry), [favorites]);
 
   const toggleFavorite = useCallback((entry) => {
     setFavorites((current) => {

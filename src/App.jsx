@@ -7,10 +7,12 @@ import ErrorMessage from "./components/ErrorMessage.jsx";
 import UnitToggle from "./components/UnitToggle.jsx";
 import ThemeToggle from "./components/ThemeToggle.jsx";
 import RecentSearchChips from "./components/RecentSearchChips.jsx";
+import FavoritesRow from "./components/FavoritesRow.jsx";
 import { useWeather } from "./hooks/useWeather.js";
 import { useUnit } from "./hooks/useUnit.js";
 import { useTheme } from "./hooks/useTheme.js";
 import { useRecentSearches } from "./hooks/useRecentSearches.js";
+import { useFavorites } from "./hooks/useFavorites.js";
 import { getItem, setItem } from "./lib/storage.js";
 
 const LAST_CITY_KEY = "awr_last_city";
@@ -21,6 +23,7 @@ function App() {
   const { unit, toggleUnit } = useUnit();
   const { theme, toggleTheme } = useTheme();
   const { recents, record } = useRecentSearches();
+  const { favorites, toggleFavorite, isFavorited, atCap } = useFavorites();
 
   // Ports v1's runSearch: after a successful search, build a recent-
   // search entry from the resolved current-weather response (same
@@ -57,6 +60,20 @@ function App() {
     handleSearch(initialCity);
   }, [handleSearch]);
 
+  // The favorites entry shape for whatever city is currently
+  // displayed — same {name, country, lat, lon} fields pulled the
+  // same way handleSearch already builds a recent-search entry.
+  // null while there's no data yet, so the star toggle has nothing
+  // to act on until a search has actually resolved.
+  const currentEntry = data
+    ? {
+        name: data.name,
+        country: data.sys?.country ?? "",
+        lat: data.coord?.lat,
+        lon: data.coord?.lon,
+      }
+    : null;
+
   return (
     <div id="app">
       <header className="site-header">
@@ -69,11 +86,20 @@ function App() {
       <main className="main">
         <section className="search-section" aria-label="City search">
           <SearchForm onSearch={handleSearch} />
+          <FavoritesRow favorites={favorites} onSelect={handleSearch} />
           <RecentSearchChips recents={recents} onSelect={handleSearch} />
           <ErrorMessage error={error} />
         </section>
         <LoadingSpinner loading={loading} />
-        <CurrentWeatherCard data={data} loading={loading} error={error} unit={unit} />
+        <CurrentWeatherCard
+          data={data}
+          loading={loading}
+          error={error}
+          unit={unit}
+          isFavorited={currentEntry ? isFavorited(currentEntry) : false}
+          onToggleFavorite={currentEntry ? () => toggleFavorite(currentEntry) : undefined}
+          atCap={atCap}
+        />
         <ForecastCards forecast={forecast} unit={unit} />
       </main>
     </div>
