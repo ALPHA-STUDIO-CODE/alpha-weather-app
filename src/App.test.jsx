@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App.jsx";
@@ -258,5 +258,134 @@ describe("App — favorites-full warning clears on a new search (bugfix)", () =>
 
     await waitFor(() => expect(screen.getByText("25°C")).toBeInTheDocument());
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+});
+
+describe("App — geolocation (Step 28)", () => {
+  const GEO_COORDS = { latitude: 9.05, longitude: 7.49 };
+  const GEO_FIXTURE = {
+    name: "CurrentLocationCity",
+    sys: { country: "GL" },
+    main: { temp: 18, humidity: 60 },
+    weather: [{ description: "clear sky", icon: "01d" }],
+    wind: { speed: 1 },
+    dt: 1704110400,
+    timezone: 0,
+  };
+
+  let originalGeolocation;
+  let originalPermissions;
+
+  function mockPermissionState(state) {
+    Object.defineProperty(navigator, "permissions", {
+      value: { query: vi.fn().mockResolvedValue({ state }) },
+      configurable: true,
+    });
+  }
+
+  function mockGeolocationSuccess() {
+    Object.defineProperty(navigator, "geolocation", {
+      value: {
+        getCurrentPosition: vi.fn((success) => success({ coords: GEO_COORDS })),
+      },
+      configurable: true,
+    });
+  }
+
+  function mockGeolocationFailure(error) {
+    Object.defineProperty(navigator, "geolocation", {
+      value: {
+        getCurrentPosition: vi.fn((_success, onError) => onError(error)),
+      },
+      configurable: true,
+    });
+  }
+
+  beforeEach(() => {
+    fetchCurrentWeather.mockReset();
+    fetchForecast.mockReset();
+    fetchForecast.mockResolvedValue(ONE_DAY_FORECAST_FIXTURE);
+    localStorage.clear();
+    originalGeolocation = navigator.geolocation;
+    originalPermissions = navigator.permissions;
+  });
+
+  afterEach(() => {
+    Object.defineProperty(navigator, "geolocation", {
+      value: originalGeolocation,
+      configurable: true,
+    });
+    Object.defineProperty(navigator, "permissions", {
+      value: originalPermissions,
+      configurable: true,
+    });
+  });
+
+  it("with permission already granted, silently overrides the smart-initial-load result with current-location weather", async () => {
+    mockPermissionState("granted");
+    mockGeolocationSuccess();
+    fetchCurrentWeather.mockImplementation((location) =>
+      Promise.resolve(
+        typeof location === "object" && location !== null ? GEO_FIXTURE : ABUJA_FIXTURE,
+      ),
+    );
+
+    render(<App />);
+
+    // Step 17's default (Abuja) load still fires — Step 28 does not
+    // change that code — but the geolocation search resolves after
+    // it and its result is what the user actually ends up seeing.
+    await waitFor(() => expect(fetchCurrentWeather).toHaveBeenCalledWith("Abuja"));
+    await waitFor(() => expect(fetchCurrentWeather).toHaveBeenCalledWith({ lat: 9.05, lon: 7.49 }));
+    await waitFor(() => expect(screen.getByText("18°C")).toBeInTheDocument());
+  });
+
+  it("with permission not yet granted, falls back to last-city/Abuja with no native prompt attempted", async () => {
+    mockPermissionState("prompt");
+    mockGeolocationSuccess();
+    fetchCurrentWeather.mockResolvedValue(ABUJA_FIXTURE);
+
+    render(<App />);
+
+    await waitFor(() => expect(screen.getByText("30°C")).toBeInTheDocument());
+    expect(navigator.geolocation.getCurrentPosition).not.toHaveBeenCalled();
+  });
+
+  it("clicking the location button always attempts a fetch, regardless of prior permission state", async () => {
+    mockPermissionState("denied");
+    mockGeolocationSuccess();
+    fetchCurrentWeather.mockImplementation((location) =>
+      Promise.resolve(
+        typeof location === "object" && location !== null ? GEO_FIXTURE : ABUJA_FIXTURE,
+      ),
+    );
+    const user = userEvent.setup();
+    render(<App />);
+
+    await waitFor(() => expect(screen.getByText("30°C")).toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /use my location/i }));
+
+    await waitFor(() => expect(screen.getByText("18°C")).toBeInTheDocument());
+  });
+
+  it("on denial/failure, shows the inline fallback message without blanking the existing display", async () => {
+    mockPermissionState("denied");
+    mockGeolocationFailure({ code: 1, message: "User denied Geolocation" });
+    fetchCurrentWeather.mockResolvedValue(ABUJA_FIXTURE);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await waitFor(() => expect(screen.getByText("30°C")).toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /use my location/i }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Couldn't get your location. Showing Abuja instead.",
+      ),
+    );
+    // Existing weather display is untouched by the failed attempt.
+    expect(screen.getByText("30°C")).toBeInTheDocument();
   });
 });
