@@ -1,11 +1,8 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
-
 import { buildUpstreamRequest } from "./weather-request.js";
 import { setDefaultAutoSelectFamilyAttemptTimeout } from "node:net";
-
 setDefaultAutoSelectFamilyAttemptTimeout(300);
-
 export async function handleWeatherRequest(
   query,
   fetchImpl,
@@ -15,7 +12,6 @@ export async function handleWeatherRequest(
   if (built.error) {
     return { status: built.error.status, body: { error: built.error.message } };
   }
-
   const url = new URL(built.url);
   for (const [key, value] of Object.entries(built.params)) {
     url.searchParams.set(key, value);
@@ -24,20 +20,14 @@ export async function handleWeatherRequest(
   if (query.type !== "geocode") {
     url.searchParams.set("units", "metric");
   }
-
   try {
     const response = await fetchImpl(url.toString());
     const data = await response.json();
-
     if (response.status === 404) {
       return { status: 404, body: { error: "city not found" } };
     }
     if (!response.ok) {
-      console.error(
-        "OpenWeather returned non-OK status:",
-        response.status,
-        data,
-      );
+      console.error("OpenWeather returned non-OK status:", response.status, data);
       return {
         status: 502,
         body: { error: "upstream weather service failed" },
