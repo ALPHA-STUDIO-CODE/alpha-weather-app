@@ -50,6 +50,30 @@ describe("SearchForm", () => {
     expect(onSearch).not.toHaveBeenCalled();
   });
 
+  describe("location button (Step 28)", () => {
+    it("does not render a location button when onLocationClick is not provided", () => {
+      render(<SearchForm onSearch={() => {}} />);
+      expect(screen.queryByRole("button", { name: /use my location/i })).not.toBeInTheDocument();
+    });
+
+    it("renders an always-visible location button when onLocationClick is provided", () => {
+      render(<SearchForm onSearch={() => {}} onLocationClick={() => {}} />);
+      expect(screen.getByRole("button", { name: /use my location/i })).toBeInTheDocument();
+    });
+
+    it("calls onLocationClick when the location button is clicked, without touching onSearch", async () => {
+      const user = userEvent.setup();
+      const onSearch = vi.fn();
+      const onLocationClick = vi.fn();
+      render(<SearchForm onSearch={onSearch} onLocationClick={onLocationClick} />);
+
+      await user.click(screen.getByRole("button", { name: /use my location/i }));
+
+      expect(onLocationClick).toHaveBeenCalledTimes(1);
+      expect(onSearch).not.toHaveBeenCalled();
+    });
+  });
+
   describe("autocomplete (Step 19)", () => {
     // Real timers throughout — combining userEvent's own internal
     // timing with vi.useFakeTimers() proved fragile (type()/keyboard()

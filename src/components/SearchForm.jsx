@@ -24,8 +24,18 @@ import { useAutocomplete } from "../hooks/useAutocomplete.js";
  *   (matching v1's `if (highlightedIndex >= 0)` guard) — with nothing
  *   highlighted, Enter falls through to the form's native submit,
  *   which is exactly the typed-search behavior we still want.
+ *
+ * `onLocationClick` (Step 28, spec §4.1) is optional so existing
+ * callers/tests that only care about typed search don't need to
+ * change: when provided, an always-visible location button renders
+ * next to the search button. It's a plain type="button" so it can
+ * never trigger the form's submit handler, and it takes no arguments
+ * — App.jsx owns what "use my location" actually does (via
+ * useGeolocation's requestLocation()) and any resulting error
+ * message; this component only needs to render the button and relay
+ * the click.
  */
-function SearchForm({ onSearch }) {
+function SearchForm({ onSearch, onLocationClick }) {
   const [city, setCity] = useState("");
   const [dismissed, setDismissed] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -133,6 +143,29 @@ function SearchForm({ onSearch }) {
       <button type="submit" className={`search-form__button ${styles.button}`}>
         Search
       </button>
+      {onLocationClick && (
+        <button
+          type="button"
+          className={`search-form__location ${styles.locationButton}`}
+          aria-label="Use my location"
+          onClick={onLocationClick}
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 21s-7-6.5-7-11.5a7 7 0 0 1 14 0C19 14.5 12 21 12 21z" />
+            <circle cx="12" cy="9.5" r="2.5" />
+          </svg>
+        </button>
+      )}
     </form>
   );
 }
