@@ -136,12 +136,17 @@ describe("App — recent searches integration (Step 16)", () => {
     // Prior chip is still there — recording adds, doesn't replace.
     expect(screen.getByRole("button", { name: "Abuja, NG" })).toBeInTheDocument();
 
-    fetchCurrentWeather.mockClear();
+    // Step 30 note: by this point Abuja was already fetched once (the
+    // Step 17 initial auto-load above), so re-clicking its chip within
+    // the cache's freshness window is a legitimate cache hit — no
+    // fetchCurrentWeather call is expected here, that's the caching
+    // feature working as designed, not a gap in the chip wiring. What
+    // this test can still verify is the outcome: clicking the chip
+    // still runs it through handleSearch and the display updates back
+    // to that city's weather (proven by useWeather.test.jsx's own
+    // Step 30 suite either way, cached or not).
     await user.click(screen.getByRole("button", { name: "Abuja, NG" }));
 
-    await waitFor(() => expect(fetchCurrentWeather).toHaveBeenCalledWith("Abuja"));
-    // Clicking the chip re-searched and the display updated back to
-    // that city's weather.
     await waitFor(() => expect(screen.getByText("30°C")).toBeInTheDocument());
   });
 });

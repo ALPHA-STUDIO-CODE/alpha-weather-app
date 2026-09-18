@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useWeather } from "./useWeather.js";
 import { WeatherApiError } from "../apiClient.js";
+import { setCached, cacheKeyFor } from "../lib/cache.js";
 
 vi.mock("../apiClient.js", async () => {
   const actual = await vi.importActual("../apiClient.js");
@@ -197,5 +198,98 @@ describe("useWeather", () => {
       resolvedValue = await result.current.search("Xyzzzzz");
     });
     expect(resolvedValue).toBeUndefined();
+  });
+});
+
+describe("useWeather — client-side cache (Step 30)", () => {
+  beforeEach(() => {
+    fetchCurrentWeather.mockReset();
+    fetchForecast.mockReset();
+    localStorage.clear();
+  });
+
+  it("a fresh pre-seeded cache entry for both current + forecast skips the network entirely and never shows loading", async () => {
+    setCached(cacheKeyFor("Abuja", "current"), CURRENT_FIXTURE);
+    setCached(cacheKeyFor("Abuja", "forecast"), TWO_DAY_FORECAST_FIXTURE);
+    const { result } = renderHook(() => useWeather());
+
+    let loadingDuringSearch;
+    await act(async () => {
+      const searchPromise = result.current.search("Abuja");
+      loadingDuringSearch = result.current.loading;
+      await searchPromise;
+    });
+
+    expect(loadingDuringSearch).toBe(false);
+    expect(fetchCurrentWeather).not.toHaveBeenCalled();
+    expect(fetchForecast).not.toHaveBeenCalled();
+    expect(result.current.data).toEqual(CURRENT_FIXTURE);
+    expect(result.current.forecast).toHaveLength(2);
+    expect(result.current.loading).toBe(false);
+  });
+
+  it("a stale pre-seeded entry is treated as a miss: the network is called and the cache is refreshed", async () => {
+    const staleEntry = { name: "Abuja", main: { temp: 99 } };
+    const key = cacheKeyFor("Abuja", "current");
+    const realNow = Date.now;
+    Date.now = () => 1_000_000;
+    setCached(key, staleEntry);
+    Date.now = () => 1_000_000 + 31 * 60 * 1000; // 31 minutes later — stale
+    setCached(cacheKeyFor("Abuja", "forecast"), TWO_DAY_FORECAST_FIXTURE);
+    // the forecast entry above is fresh as of "now", only current is stale
+
+    fetchCurrentWeather.mockResolvedValue(CURRENT_FIXTURE);
+    fetchForecast.mockResolvedValue(TWO_DAY_FORECAST_FIXTURE);
+    const { result } = renderHook(() => useWeather());
+
+    await act(async () => {
+      await result.current.search("Abuja");
+    });
+
+    expect(fetchCurrentWeather).toHaveBeenCalledTimes(1);
+    expect(fetchForecast).not.toHaveBeenCalled();
+    expect(result.current.data).toEqual(CURRENT_FIXTURE);
+
+    Date.now = realNow;
+  });
+
+  it("absent cache entries: search() fetches normally and populates the cache for a later hit", async () => {
+    fetchCurrentWeather.mockResolvedValue(CURRENT_FIXTURE);
+    fetchForecast.mockResolvedValue(TWO_DAY_FORECAST_FIXTURE);
+    const { result } = renderHook(() => useWeather());
+
+    await act(async () => {
+      await result.current.search("Abuja");
+    });
+    expect(fetchCurrentWeather).toHaveBeenCalledTimes(1);
+    expect(fetchForecast).toHaveBeenCalledTimes(1);
+
+    // A second search for the same city should now be a full cache
+    // hit — no further network calls.
+    await act(async () => {
+      await result.current.search("Abuja");
+    });
+    expect(fetchCurrentWeather).toHaveBeenCalledTimes(1);
+    expect(fetchForecast).toHaveBeenCalledTimes(1);
+  });
+
+  it("a rejection is never cached, so the next search retries the network", async () => {
+    const apiError = new WeatherApiError("nope", "not_found");
+    fetchCurrentWeather.mockRejectedValueOnce(apiError);
+    fetchForecast.mockResolvedValue(TWO_DAY_FORECAST_FIXTURE);
+    const { result } = renderHook(() => useWeather());
+
+    await act(async () => {
+      await result.current.search("Xyzzzzz");
+    });
+    expect(result.current.error).toBe(apiError);
+
+    fetchCurrentWeather.mockResolvedValueOnce(CURRENT_FIXTURE);
+    await act(async () => {
+      await result.current.search("Xyzzzzz");
+    });
+
+    expect(fetchCurrentWeather).toHaveBeenCalledTimes(2);
+    expect(result.current.data).toEqual(CURRENT_FIXTURE);
   });
 });
