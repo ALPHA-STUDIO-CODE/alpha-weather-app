@@ -48,7 +48,7 @@ describe("ForecastCards", () => {
     // weatherIcons.test.js's job).
     expect(screen.getByRole("img", { name: "clear sky" })).toHaveAttribute(
       "src",
-      "https://cdn.meteocons.com/latest/svg/fill/not-available.svg",
+      "https://cdn.meteocons.com/3.0.0-next.10/svg/fill/not-available.svg",
     );
   });
 

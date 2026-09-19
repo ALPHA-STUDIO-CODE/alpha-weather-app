@@ -33,7 +33,10 @@ describe("WeatherIcon", () => {
     render(<WeatherIcon code="01d" alt="clear sky" />);
 
     const img = screen.getByRole("img", { name: "clear sky" });
-    expect(img).toHaveAttribute("src", "https://cdn.meteocons.com/latest/svg/fill/clear-day.svg");
+    expect(img).toHaveAttribute(
+      "src",
+      "https://cdn.meteocons.com/3.0.0-next.10/svg/fill/clear-day.svg",
+    );
   });
 
   it("renders the correct mapped SVG for a different known code", () => {
@@ -43,7 +46,7 @@ describe("WeatherIcon", () => {
     const img = screen.getByRole("img", { name: "rain" });
     expect(img).toHaveAttribute(
       "src",
-      "https://cdn.meteocons.com/latest/svg/fill/partly-cloudy-night-rain.svg",
+      "https://cdn.meteocons.com/3.0.0-next.10/svg/fill/partly-cloudy-night-rain.svg",
     );
   });
 
@@ -54,7 +57,7 @@ describe("WeatherIcon", () => {
     const img = screen.getByRole("img", { name: "unknown" });
     expect(img).toHaveAttribute(
       "src",
-      "https://cdn.meteocons.com/latest/svg/fill/not-available.svg",
+      "https://cdn.meteocons.com/3.0.0-next.10/svg/fill/not-available.svg",
     );
   });
 
@@ -65,7 +68,7 @@ describe("WeatherIcon", () => {
     const img = screen.getByRole("img", { name: "clear sky" });
     expect(img).toHaveAttribute(
       "src",
-      "https://cdn.meteocons.com/latest/svg-static/fill/clear-day.svg",
+      "https://cdn.meteocons.com/3.0.0-next.10/svg-static/fill/clear-day.svg",
     );
   });
 

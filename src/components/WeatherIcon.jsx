@@ -2,12 +2,12 @@ import styles from "./WeatherIcon.module.css";
 import { meteoconFor } from "../lib/weatherIcons.js";
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion.js";
 
-// `latest` always resolves to the newest full release rather than a
-// pinned version — the CDN docs recommend pinning in production so a
-// future release can't change icons out from under this app
-// unannounced. Left as `latest` for now (revisit once this project
-// reaches its production-hardening phases, e.g. Phase V) rather than
-// pinning to whatever pre-release happens to be current today.
+// Meteocons' real CDN, confirmed against its published docs
+// (meteocons.com/docs/cdn): `https://cdn.meteocons.com/{version}/
+// {format}/{style}/{icon}.svg`. No package to install and no files
+// to vendor — the CDN is designed to be hot-linked directly, and
+// serves permissive CORS headers for exactly that.
+
 const CDN_VERSION = "3.0.0-next.10";
 // "fill" is Meteocons' richly-colored, general-purpose style — the
 // one demonstrated throughout their own docs and a natural fit for a
