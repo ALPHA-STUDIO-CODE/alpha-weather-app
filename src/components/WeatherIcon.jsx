@@ -8,7 +8,7 @@ import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion.js";
 // unannounced. Left as `latest` for now (revisit once this project
 // reaches its production-hardening phases, e.g. Phase V) rather than
 // pinning to whatever pre-release happens to be current today.
-const CDN_VERSION = "latest";
+const CDN_VERSION = "3.0.0-next.10";
 // "fill" is Meteocons' richly-colored, general-purpose style — the
 // one demonstrated throughout their own docs and a natural fit for a
 // weather app's current-conditions/forecast cards. The other three
