@@ -29,7 +29,7 @@
 .icon {
   width: 44px;
   height: 44px;
-  margin: var(--space-1) 0;
+  margin: var(--space-1) auto;
 }
 
 .temps {

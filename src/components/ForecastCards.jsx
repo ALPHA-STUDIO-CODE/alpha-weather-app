@@ -1,5 +1,6 @@
 import styles from "./ForecastCards.module.css";
 import { formatTemp } from "../lib/units.js";
+import WeatherIcon from "./WeatherIcon.jsx";
 
 /**
  * formatDayLabel is kept local to this component rather than in
@@ -35,11 +36,7 @@ function ForecastCards({ forecast, unit = "C" }) {
       {forecast.map((day) => (
         <article className={styles.card} key={day.date}>
           <p className={styles.day}>{formatDayLabel(day.date)}</p>
-          <img
-            className={styles.icon}
-            src={`https://openweathermap.org/img/wn/${day.icon}@2x.png`}
-            alt={day.condition}
-          />
+          <WeatherIcon code={day.icon} alt={day.condition} className={styles.icon} />
           <p className={styles.temps}>
             {formatTemp(day.max, unit)} / {formatTemp(day.min, unit)}
           </p>
