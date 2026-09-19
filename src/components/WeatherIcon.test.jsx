@@ -33,7 +33,7 @@ describe("WeatherIcon", () => {
     render(<WeatherIcon code="01d" alt="clear sky" />);
 
     const img = screen.getByRole("img", { name: "clear sky" });
-    expect(img).toHaveAttribute("src", "/icons/meteocons/animated/clear-day.svg");
+    expect(img).toHaveAttribute("src", "https://cdn.meteocons.com/latest/svg/fill/clear-day.svg");
   });
 
   it("renders the correct mapped SVG for a different known code", () => {
@@ -41,7 +41,10 @@ describe("WeatherIcon", () => {
     render(<WeatherIcon code="10n" alt="rain" />);
 
     const img = screen.getByRole("img", { name: "rain" });
-    expect(img).toHaveAttribute("src", "/icons/meteocons/animated/partly-cloudy-night-rain.svg");
+    expect(img).toHaveAttribute(
+      "src",
+      "https://cdn.meteocons.com/latest/svg/fill/partly-cloudy-night-rain.svg",
+    );
   });
 
   it("falls back to the not-available icon for an unrecognized code, without crashing", () => {
@@ -49,15 +52,21 @@ describe("WeatherIcon", () => {
     render(<WeatherIcon code="99x" alt="unknown" />);
 
     const img = screen.getByRole("img", { name: "unknown" });
-    expect(img).toHaveAttribute("src", "/icons/meteocons/animated/not-available.svg");
+    expect(img).toHaveAttribute(
+      "src",
+      "https://cdn.meteocons.com/latest/svg/fill/not-available.svg",
+    );
   });
 
-  it("renders the static variant when the OS prefers reduced motion", () => {
+  it("renders the svg-static variant when the OS prefers reduced motion", () => {
     mockPrefersReducedMotion(true);
     render(<WeatherIcon code="01d" alt="clear sky" />);
 
     const img = screen.getByRole("img", { name: "clear sky" });
-    expect(img).toHaveAttribute("src", "/icons/meteocons/static/clear-day.svg");
+    expect(img).toHaveAttribute(
+      "src",
+      "https://cdn.meteocons.com/latest/svg-static/fill/clear-day.svg",
+    );
   });
 
   it("composes the caller's sizing className alongside its own module class", () => {

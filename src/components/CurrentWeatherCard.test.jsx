@@ -34,7 +34,7 @@ describe("CurrentWeatherCard", () => {
     expect(screen.getByText("4.1 m/s")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "light rain" })).toHaveAttribute(
       "src",
-      "/icons/meteocons/animated/partly-cloudy-day-rain.svg",
+      "https://cdn.meteocons.com/latest/svg/fill/partly-cloudy-day-rain.svg",
     );
   });
 
