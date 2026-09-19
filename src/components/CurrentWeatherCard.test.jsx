@@ -34,7 +34,7 @@ describe("CurrentWeatherCard", () => {
     expect(screen.getByText("4.1 m/s")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "light rain" })).toHaveAttribute(
       "src",
-      "https://openweathermap.org/img/wn/10d@2x.png",
+      "/icons/meteocons/animated/partly-cloudy-day-rain.svg",
     );
   });
 

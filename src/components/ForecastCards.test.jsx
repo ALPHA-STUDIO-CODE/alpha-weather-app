@@ -39,9 +39,16 @@ describe("ForecastCards", () => {
     expect(screen.getByText("clear sky")).toBeInTheDocument();
     expect(screen.getByText("light rain")).toBeInTheDocument();
 
+    // Fixture icon codes ("a0" etc.) are fake/test-only, not real
+    // OpenWeather codes, so weatherIcons.js's meteoconFor() correctly
+    // falls back to "not-available" for all of them — this still
+    // proves ForecastCards passes day.icon through to WeatherIcon and
+    // renders the mapped src, which is what this test actually cares
+    // about (Step 33 wiring, not the mapping table itself — that's
+    // weatherIcons.test.js's job).
     expect(screen.getByRole("img", { name: "clear sky" })).toHaveAttribute(
       "src",
-      "https://openweathermap.org/img/wn/a0@2x.png",
+      "/icons/meteocons/animated/not-available.svg",
     );
   });
 

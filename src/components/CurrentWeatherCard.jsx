@@ -3,6 +3,7 @@ import { formatLocalTime } from "../lib/time.js";
 import { formatTemp } from "../lib/units.js";
 import SunriseSunset from "./SunriseSunset.jsx";
 import ErrorMessage from "./ErrorMessage.jsx";
+import WeatherIcon from "./WeatherIcon.jsx";
 
 const FAVORITES_FULL_MESSAGE = "Favorites full (10/10). Remove one to add another.";
 
@@ -79,13 +80,7 @@ function CurrentWeatherCard({ data, unit = "C", isFavorited, onToggleFavorite, a
           </h2>
           <p className={styles.time}>{localTime}</p>
         </div>
-        {icon && (
-          <img
-            className={styles.icon}
-            src={`https://openweathermap.org/img/wn/${icon}@2x.png`}
-            alt={condition}
-          />
-        )}
+        {icon && <WeatherIcon code={icon} alt={condition} className={styles.icon} />}
       </div>
       {atCap && <ErrorMessage message={FAVORITES_FULL_MESSAGE} />}
       <p className={styles.temp}>{formatTemp(data.main.temp, unit)}</p>

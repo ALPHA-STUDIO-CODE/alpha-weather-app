@@ -1,0 +1,14 @@
+.icon {
+  display: block;
+}
+
+/* Ported from v1's dark-mode icon-contrast filter (HANDOFF.md's
+   Known Quirks): a light, soft-edged icon reads as washed-out
+   against the dark theme's background — true of Meteocons' SVGs
+   just as it was of OpenWeather's PNGs, so the fix carries over
+   unchanged rather than being reinvented (spec §4.4). No layout
+   impact, colors untouched; safe to delete if a future icon
+   revision makes it look wrong — same caveat v1 left for itself. */
+body.dark-mode .icon {
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35)) contrast(1.1) brightness(1.05);
+}
