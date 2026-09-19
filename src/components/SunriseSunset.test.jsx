@@ -29,6 +29,21 @@ describe("SunriseSunset", () => {
     expect(screen.getByText("4:45 PM")).toBeInTheDocument();
   });
 
+  it("renders the Meteocons sunrise/sunset icons, decorative (empty alt)", () => {
+    render(<SunriseSunset data={LONDON_FIXTURE} />);
+
+    const images = screen.getAllByRole("presentation");
+    expect(images).toHaveLength(2);
+    expect(images[0]).toHaveAttribute(
+      "src",
+      "https://cdn.meteocons.com/3.0.0-next.10/svg/fill/sunrise.svg",
+    );
+    expect(images[1]).toHaveAttribute(
+      "src",
+      "https://cdn.meteocons.com/3.0.0-next.10/svg/fill/sunset.svg",
+    );
+  });
+
   it("uses the city's own UTC offset, not zero/device time", () => {
     const abujaFixture = {
       sys: { sunrise: 1704090600, sunset: 1704127500 },
