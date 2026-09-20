@@ -1,0 +1,110 @@
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  transition: background 0.6s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .background {
+    transition: none;
+  }
+}
+
+.background[data-variant="clear-day"] {
+  background: linear-gradient(to bottom, #4a90d9, #87ceeb 55%, #ffd89b);
+}
+.background[data-variant="clear-night"] {
+  background: linear-gradient(to bottom, #0b1026, #1a2a4a);
+}
+.background[data-variant="partly-cloudy-day"] {
+  background: linear-gradient(to bottom, #6fa8dc, #cfe2f3);
+}
+.background[data-variant="partly-cloudy-night"] {
+  background: linear-gradient(to bottom, #141e30, #243b55);
+}
+.background[data-variant="cloudy-day"] {
+  background: linear-gradient(to bottom, #8e9eab, #eef2f3);
+}
+.background[data-variant="cloudy-night"] {
+  background: linear-gradient(to bottom, #232526, #414345);
+}
+.background[data-variant="overcast-day"] {
+  background: linear-gradient(to bottom, #757f9a, #d7dde8);
+}
+.background[data-variant="overcast-night"] {
+  background: linear-gradient(to bottom, #202225, #3a3d40);
+}
+.background[data-variant="drizzle-day"] {
+  background: linear-gradient(to bottom, #6a85b6, #bac8e0);
+}
+.background[data-variant="drizzle-night"] {
+  background: linear-gradient(to bottom, #1c2331, #2e3a4e);
+}
+.background[data-variant="rain-day"] {
+  background: linear-gradient(to bottom, #4b6584, #a5b1c2);
+}
+.background[data-variant="rain-night"] {
+  background: linear-gradient(to bottom, #0f2027, #203a43);
+}
+.background[data-variant="thunderstorm-day"] {
+  background: linear-gradient(to bottom, #29323c, #536976);
+}
+.background[data-variant="thunderstorm-night"] {
+  background: linear-gradient(to bottom, #0f0c29, #302b63);
+}
+.background[data-variant="snow-day"] {
+  background: linear-gradient(to bottom, #e6e9f0, #ffffff);
+}
+.background[data-variant="snow-night"] {
+  background: linear-gradient(to bottom, #2c3e50, #4c6b8a);
+}
+.background[data-variant="fog-day"] {
+  background: linear-gradient(to bottom, #bdc3c7, #ecf0f1);
+}
+.background[data-variant="fog-night"] {
+  background: linear-gradient(to bottom, #2c3e50, #3d4852);
+}
+
+.rainLines {
+  position: absolute;
+  inset: -20%;
+  background-image: repeating-linear-gradient(
+    115deg,
+    transparent 0,
+    transparent 6px,
+    rgb(255 255 255 / 18%) 6px,
+    rgb(255 255 255 / 18%) 8px,
+    transparent 8px,
+    transparent 28px
+  );
+  animation: rain-fall 0.6s linear infinite;
+}
+@keyframes rain-fall {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -40px 80px;
+  }
+}
+
+.cloudDrift {
+  position: absolute;
+  inset: -10% -30%;
+  background-image:
+    radial-gradient(ellipse 22% 10% at 20% 30%, rgb(255 255 255 / 35%), transparent 70%),
+    radial-gradient(ellipse 28% 12% at 60% 55%, rgb(255 255 255 / 25%), transparent 70%),
+    radial-gradient(ellipse 18% 8% at 85% 25%, rgb(255 255 255 / 30%), transparent 70%);
+  animation: cloud-drift 60s linear infinite;
+}
+@keyframes cloud-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 200px 0;
+  }
+}

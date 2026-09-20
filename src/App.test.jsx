@@ -3,11 +3,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App.jsx";
 
-// First App-level test in the project — Step 12 explicitly asks for
-// a cross-component check ("toggling flips rendered temp strings on
-// both cards") that neither CurrentWeatherCard.test.jsx nor
-// ForecastCards.test.jsx can cover alone, since each only tests a
-// single component in isolation with a fixed `unit` prop.
 vi.mock("./apiClient.js", async () => {
   const actual = await vi.importActual("./apiClient.js");
   return {
@@ -62,10 +57,6 @@ describe("App — unit toggle integration (Step 12)", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    // Step 17's smart initial load fires the first search
-    // automatically on mount (defaults to Abuja) — this test is
-    // about the unit toggle, not the search flow, so there's no
-    // need to drive the form as well.
     await waitFor(() => expect(screen.getByText("30°C")).toBeInTheDocument());
     expect(screen.getByText("30°C / 20°C")).toBeInTheDocument();
     expect(screen.getByText("3.2 m/s")).toBeInTheDocument();
@@ -116,11 +107,6 @@ describe("App — recent searches integration (Step 16)", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    // Step 17's smart initial load fires handleSearch('Abuja')
-    // automatically on mount through this exact same shared entry
-    // point — wait for it to settle and produce the first chip
-    // before doing anything else, rather than searching it again by
-    // hand.
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Abuja, NG" })).toBeInTheDocument(),
     );
@@ -136,15 +122,6 @@ describe("App — recent searches integration (Step 16)", () => {
     // Prior chip is still there — recording adds, doesn't replace.
     expect(screen.getByRole("button", { name: "Abuja, NG" })).toBeInTheDocument();
 
-    // Step 30 note: by this point Abuja was already fetched once (the
-    // Step 17 initial auto-load above), so re-clicking its chip within
-    // the cache's freshness window is a legitimate cache hit — no
-    // fetchCurrentWeather call is expected here, that's the caching
-    // feature working as designed, not a gap in the chip wiring. What
-    // this test can still verify is the outcome: clicking the chip
-    // still runs it through handleSearch and the display updates back
-    // to that city's weather (proven by useWeather.test.jsx's own
-    // Step 30 suite either way, cached or not).
     await user.click(screen.getByRole("button", { name: "Abuja, NG" }));
 
     await waitFor(() => expect(screen.getByText("30°C")).toBeInTheDocument());
@@ -392,5 +369,67 @@ describe("App — geolocation (Step 28)", () => {
     );
     // Existing weather display is untouched by the failed attempt.
     expect(screen.getByText("30°C")).toBeInTheDocument();
+  });
+});
+
+describe("App — weather background wiring (Step 35)", () => {
+  const WITH_SUN_TIMES = {
+    name: "Abuja",
+    sys: { country: "NG", sunrise: 1704090600, sunset: 1704127500 }, // 06:30/16:45 UTC
+    main: { temp: 30, humidity: 40 },
+    weather: [{ description: "clear sky", icon: "01d" }],
+    wind: { speed: 3.2 },
+    dt: 1704110400, // 2024-01-01T06:40:00Z — after sunrise, before sunset → day
+    timezone: 3600,
+  };
+  const LONDON_RAIN = {
+    name: "London",
+    sys: { country: "GB", sunrise: 1704090600, sunset: 1704127500 },
+    main: { temp: 15, humidity: 70 },
+    weather: [{ description: "light rain", icon: "10n" }],
+    wind: { speed: 4.1 },
+    dt: 1704200000, // well after sunset → night
+    timezone: 0,
+  };
+
+  beforeEach(() => {
+    fetchCurrentWeather.mockReset();
+    fetchForecast.mockReset();
+    fetchForecast.mockResolvedValue(ONE_DAY_FORECAST_FIXTURE);
+    localStorage.clear();
+  });
+
+  it("renders no background until the first search resolves with sunrise/sunset data", () => {
+    fetchCurrentWeather.mockImplementation(() => new Promise(() => {})); // never resolves
+    const { container } = render(<App />);
+
+    expect(container.querySelector("[data-variant]")).toBeNull();
+  });
+
+  it("renders the correct background variant once weather data loads", async () => {
+    fetchCurrentWeather.mockResolvedValue(WITH_SUN_TIMES);
+    const { container } = render(<App />);
+
+    await waitFor(() =>
+      expect(container.querySelector('[data-variant="clear-day"]')).not.toBeNull(),
+    );
+  });
+
+  it("updates the background variant on a new search, with no separate fetch of its own", async () => {
+    fetchCurrentWeather.mockImplementation((location) =>
+      Promise.resolve(location === "London" ? LONDON_RAIN : WITH_SUN_TIMES),
+    );
+    const { container } = render(<App />);
+    await waitFor(() =>
+      expect(container.querySelector('[data-variant="clear-day"]')).not.toBeNull(),
+    );
+
+    const user = userEvent.setup();
+    await user.type(screen.getByRole("textbox"), "London");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() =>
+      expect(container.querySelector('[data-variant="rain-night"]')).not.toBeNull(),
+    );
   });
 });
