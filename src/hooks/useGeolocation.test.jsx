@@ -129,4 +129,22 @@ describe("useGeolocation", () => {
     await expect(result.current.requestLocation()).rejects.toBeTruthy();
     expect(search).not.toHaveBeenCalled();
   });
+
+  it("does not crash if permissions.query() ever throws synchronously (defensive; not a confirmed Safari-specific bug — see the code comment)", async () => {
+    mockGeolocationSuccess();
+    Object.defineProperty(navigator, "permissions", {
+      value: {
+        query: vi.fn(() => {
+          throw new TypeError("Failed to execute 'query' on 'Permissions'");
+        }),
+      },
+      configurable: true,
+    });
+    const search = vi.fn();
+
+    expect(() => {
+      renderHook(() => useGeolocation(search));
+    }).not.toThrow();
+    expect(search).not.toHaveBeenCalled();
+  });
 });
