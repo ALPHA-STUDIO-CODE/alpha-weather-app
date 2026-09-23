@@ -81,13 +81,14 @@
     transparent 28px
   );
   animation: rain-fall 0.6s linear infinite;
+  will-change: transform;
 }
 @keyframes rain-fall {
   from {
-    background-position: 0 0;
+    transform: translate3d(0, 0, 0);
   }
   to {
-    background-position: -40px 80px;
+    transform: translate3d(-40px, 80px, 0);
   }
 }
 
@@ -99,12 +100,13 @@
     radial-gradient(ellipse 28% 12% at 60% 55%, rgb(255 255 255 / 25%), transparent 70%),
     radial-gradient(ellipse 18% 8% at 85% 25%, rgb(255 255 255 / 30%), transparent 70%);
   animation: cloud-drift 60s linear infinite;
+  will-change: transform;
 }
 @keyframes cloud-drift {
   from {
-    background-position: 0 0;
+    transform: translate3d(0, 0, 0);
   }
   to {
-    background-position: 200px 0;
+    transform: translate3d(200px, 0, 0);
   }
 }
