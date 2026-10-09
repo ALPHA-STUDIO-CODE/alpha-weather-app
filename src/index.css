@@ -60,6 +60,17 @@ body {
     background-color 0.15s ease,
     color 0.15s ease;
 }
+.horizon-divider {
+  height: 2px;
+  margin: var(--space-4) 0 var(--space-6);
+  background: linear-gradient(
+    90deg,
+    var(--color-border) 0%,
+    var(--color-accent) 50%,
+    var(--color-border) 100%
+  );
+  border-radius: var(--radius-pill);
+}
 @media (prefers-reduced-motion: reduce) {
   body {
     transition: none;

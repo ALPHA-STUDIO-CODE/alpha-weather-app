@@ -88,6 +88,7 @@ function App() {
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </div>
         </header>
+        <div className="horizon-divider" aria-hidden="true"></div>
         <main className="main">
           <section className="search-section" aria-label="City search">
             <SearchForm onSearch={handleSearch} onLocationClick={handleLocationClick} />
