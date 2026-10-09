@@ -8,6 +8,7 @@
   color: var(--color-text-primary);
   font-family: var(--font-mono);
   font-size: 0.875rem;
+  margin: var(--space-2);
   cursor: pointer;
 }
 .pill:hover {
